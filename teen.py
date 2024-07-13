@@ -126,6 +126,8 @@ def teenagers_specify(event, context):
 
 
 def teenagers_friends(event, context):
+    if 'used_advices_fr' not in event['state']['session']:
+        event['state']['session']['used_advices_fr'] = []
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
         return {
             'version': event['version'],
@@ -145,21 +147,36 @@ def teenagers_friends(event, context):
             'session': event['session'],
             'session_state': {
                 'value': 'teenagers_friends',
-                'subtopic': event['state']['session']['subtopic']
+                'subtopic': event['state']['session']['subtopic'],
+                'used_advices_fr': event['state']['session']['used_advices_fr']
             },
             'response': {
                 'text': 'Извини, не поняла. Тебе нужен совет?',
                 'end_session': 'false'
             },
         }
-    advice = random.choice(advices_fr)
-    text = advice + '\nХочешь ещё один совет?'
+    used_advices_fr = event['state']['session']['used_advices_fr']
+    if len(used_advices_fr) == len(advices_fr):
+        return {
+            'version': event['version'],
+            'session': event['session'],
+            'response': {
+                'text': "Извини, советы закончились. " + end_text,
+                'end_session': 'false'
+            },
+        }
+    advice_id = random.randint(0, len(advices_fr) - 1)
+    while advice_id in used_advices_fr:
+        advice_id = random.randint(0, len(advices_fr) - 1)
+    used_advices_fr.append(advice_id)
+    text = advices_fr[advice_id] + '\nХочешь ещё один совет?'
     return {
         'version': event['version'],
         'session': event['session'],
         'session_state': {
             'value': 'teenagers_friends',
-            'subtopic': event['state']['session']['subtopic']
+            'subtopic': event['state']['session']['subtopic'],
+            'used_advices_fr': used_advices_fr
         },
         'response': {
             'text': text,
@@ -225,6 +242,8 @@ def teenagers_love(event, context, message=''):
 
 
 def teenagers_bored(event, context):
+    if 'used_advices_br' not in event['state']['session']:
+        event['state']['session']['used_advices_br'] = []
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
         return {
             'version': event['version'],
@@ -243,22 +262,37 @@ def teenagers_bored(event, context):
             'version': event['version'],
             'session': event['session'],
             'session_state': {
-                'value': 'teenagers_bored',
-                'subtopic': event['state']['session']['subtopic']
+                'value': 'teenagers_briends',
+                'subtopic': event['state']['session']['subtopic'],
+                'used_advices_br': event['state']['session']['used_advices_br']
             },
             'response': {
-                'text': 'Извини, не поняла. Тебе нужен совет?',
+                'text': 'Извини, не поняла. Тебе нужна идея?',
                 'end_session': 'false'
             },
         }
-    advice = random.choice(advices_br)
-    text = advice + '\nХочешь ещё одну идею?'
+    used_advices_br = event['state']['session']['used_advices_br']
+    if len(used_advices_br) == len(advices_br):
+        return {
+            'version': event['version'],
+            'session': event['session'],
+            'response': {
+                'text': "Извини, идеи закончились. " + end_text,
+                'end_session': 'false'
+            },
+        }
+    advice_id = random.randint(0, len(advices_br) - 1)
+    while advice_id in used_advices_br:
+        advice_id = random.randint(0, len(advices_br) - 1)
+    used_advices_br.append(advice_id)
+    text = advices_br[advice_id] + '\nХочешь ещё одну идею?'
     return {
         'version': event['version'],
         'session': event['session'],
         'session_state': {
-            'value': 'teenagers_bored',
-            'subtopic': event['state']['session']['subtopic']
+            'value': 'teenagers_briends',
+            'subtopic': event['state']['session']['subtopic'],
+            'used_advices_br': used_advices_br
         },
         'response': {
             'text': text,
