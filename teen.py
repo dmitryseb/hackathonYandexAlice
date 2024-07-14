@@ -6,6 +6,7 @@ from advice_bored import advices_br
 morph = pymorphy3.MorphAnalyzer()
 end_text = "Было приятно пообщаться. Удачи тебе! Оставайся радостными человеком и приятным собеседником."
 
+
 def have_sense(s, lists_of_key_words):
     lists_of_norm_forms = [[] for _ in range(len(lists_of_key_words))]
     for i in range(len(lists_of_key_words)):
@@ -15,16 +16,13 @@ def have_sense(s, lists_of_key_words):
     input_norm_forms = []
     for w in words:
         input_norm_forms += [form.normal_form for form in morph.parse(w)]
-    found = False
     res = -1
     for i in range(len(lists_of_norm_forms)):
-        if found:
-            break
         if len(set(input_norm_forms).intersection(set(lists_of_norm_forms[i]))) != 0:
             res = i
-            found = True
             break
     return res
+
 
 def clear(s):
     alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя- "
@@ -32,6 +30,29 @@ def clear(s):
     s = "".join([c for c in s if c in alph])
     return s
 
+
+def create_response(event, change_in_state={}, text="", buttons=[], end_session='false'):
+    session_state = event['state']['session']
+    for prop in change_in_state:
+        session_state[prop] = change_in_state[prop]
+    tts = text
+    if len(buttons) != 0:
+        tts += " Варианты ответа: "
+        for button in buttons:
+            tts += button['title'] + ', '
+        tts = tts[:-2]
+        tts += '.'
+    return {
+        'version': event['version'],
+        'session': event['session'],
+        'session_state': session_state,
+        'response': {
+            'text': text,
+            'tts': tts,
+            'end_session': end_session,
+            'buttons': buttons
+        },
+    }
 
 def request_teens(event, context, message=''):
     text = 'Хорошо! Давай поговорим! Выбери, с чем я могу тебе помочь!'
@@ -44,24 +65,11 @@ def request_teens(event, context, message=''):
         {'title': 'Отношения'},
         {'title': 'Эмоции'},
     ]
-    return {
-        'version': event['version'],
-        'session': event['session'],
-        'session_state': {
-            'value': 'teenagers_enter2'
-        },
-        'response': {
-            'text': text,
-            'end_session': 'false',
-            'buttons': buttons
-        },
-    }
+    return create_response(event, {'value': 'teenagers_enter2'}, text, buttons)
 
 
 def teenagers_enter2(event, context):
     subtopics = ['Отношения с родителями', 'Школа', 'Друзья', 'Отношения', 'Эмоции']
-    subtopic = ''
-    value = 'request_teens'
     key_words = [['родители', 'мама', 'папа', 'отец', 'мать'],
                  ['школа'],
                  ['друг', 'дружба'],
@@ -73,18 +81,10 @@ def teenagers_enter2(event, context):
     else:
         subtopic = subtopics[res]
         text = 'Можешь рассказать немного больше о проблеме?'
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
+        return create_response(event, {
                 'value': 'teenagers_specify',
                 'subtopic': subtopic,
-            },
-            'response': {
-                'text': text,
-                'end_session': 'false'
-            },
-        }
+            }, text)
 
 
 def teenagers_specify(event, context):
@@ -116,120 +116,50 @@ def teenagers_specify(event, context):
         value = 'teenagers_bored'
         text = 'Поняла, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
                'Хочешь идею, чем заняться?'
-    return {
-        'version': event['version'],
-        'session': event['session'],
-        'session_state': {
+    return create_response(event, {
             'value': value,
             'subtopic': subtopic
-        },
-        'response': {
-            'text': text,
-            'end_session': 'false',
-            'buttons': buttons
-        },
-    }
+        }, text, buttons)
 
 
 def teenagers_friends(event, context):
     if 'used_advices_fr' not in event['state']['session']:
         event['state']['session']['used_advices_fr'] = []
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
-                'value': 'request_teens',
-                'subtopic': event['state']['session']['subtopic']
-            },
-            'response': {
-                'text': end_text,
-                'end_session': 'true'
-            },
-        }
+        return create_response(event, {'value': 'request_teens'}, end_text, [], 'true')
     elif 'YANDEX.CONFIRM' not in event['request']['nlu']['intents']:
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
-                'value': 'teenagers_friends',
-                'subtopic': event['state']['session']['subtopic'],
-                'used_advices_fr': event['state']['session']['used_advices_fr']
-            },
-            'response': {
-                'text': 'Извини, не поняла. Тебе нужен совет?',
-                'end_session': 'false'
-            },
-        }
+        return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не поняла. Тебе нужен совет?')
     used_advices_fr = event['state']['session']['used_advices_fr']
     if len(used_advices_fr) == len(advices_fr):
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'response': {
-                'text': "Извини, советы закончились. " + end_text,
-                'end_session': 'false'
-            },
-        }
+        return create_response(event, text="Извини, советы закончились. " + end_text)
     advice_id = random.randint(0, len(advices_fr) - 1)
     while advice_id in used_advices_fr:
         advice_id = random.randint(0, len(advices_fr) - 1)
     used_advices_fr.append(advice_id)
     text = advices_fr[advice_id] + '\nХочешь ещё один совет?'
-    return {
-        'version': event['version'],
-        'session': event['session'],
-        'session_state': {
-            'value': 'teenagers_friends',
-            'subtopic': event['state']['session']['subtopic'],
-            'used_advices_fr': used_advices_fr
-        },
-        'response': {
-            'text': text,
-            'end_session': 'false'
-        },
-    }
+    return create_response(event, {
+        'value': 'teenagers_friends',
+        'used_advices_fr': used_advices_fr
+    }, text)
 
 
 def teenagers_love(event, context, message=''):
     response = clear(event['request']['original_utterance'])
-    if response == 'Другой случай':
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
-                'value': event['state']['session']['value'],
-                'subtopic': event['state']['session']['subtopic']
-            },
-            'response': {
-                'text': 'Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен:',
-                'end_session': 'false',
-                'buttons': [
+    if response == 'другой случай':
+        return create_response(event, text="Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.", buttons=[
                     {'title': 'Мне нравится человек, а я ему нет'},
                     {'title': 'Я нравлюсь человеку, а он мне нет'},
                     {'title': 'У меня проблемы с моим партнёром'},
-                ]
-            },
-        }
+                ])
     if response not in ['мне нравится человек а я ему нет', 'я нравлюсь человеку а он мне нет', 'у меня проблемы с моим партнёром']:
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
-                'value': event['state']['session']['value'],
-                'subtopic': event['state']['session']['subtopic']
-            },
-            'response': {
-                'text': 'Пожалуйста, выбери из предложенных вариантов:',
-                'end_session': 'false',
-                'buttons': [
-                    {'title': 'Мне нравится человек, а я ему нет'},
-                    {'title': 'Я нравлюсь человеку, а он мне нет'},
-                    {'title': 'У меня проблемы с моим партнёром'},
-                    {'title': 'Другой случай'},
-                ]
-            },
-        }
+        return create_response(event,
+                               text="Пожалуйста, выбери из предложенных вариантов. ",
+                               buttons=[
+                                   {'title': 'Мне нравится человек, а я ему нет'},
+                                   {'title': 'Я нравлюсь человеку, а он мне нет'},
+                                   {'title': 'У меня проблемы с моим партнёром'},
+                                   {'title': 'Другой случай'},
+                               ])
     text = ''
     if response == 'мне нравится человек а я ему нет':
         text = 'Не всегда мы можем понравиться другому человеку, и это нормально. Мы все разные и классные по-своему. Каждый из нас встретит того, кто ему подходит в правильное время. Если кто-то не оценил тебя так, как тебе бы хотелось, это не значит, что с тобой что-то не так. Просто ещё не пришло твоё время и не встретился твой человек.'
@@ -237,46 +167,16 @@ def teenagers_love(event, context, message=''):
         text = 'Не нужно чувствовать себя виноватым из-за этого. Не стоит начинать отношения из чувства жалости или вины. Ты не ответственен за чувства другого человека. Важно найти человека, с которым чувства будут взаимными. Взаимные чувства - это когда люди испытывают к нам ту же эмоцию, что и мы к ним. Бывает, что чувства не взаимны. Когда мы испытываем к людям одну эмоцию, а они к нам совсем другую. Это может быть печально, но жизнь такая.'
     elif response == 'у меня проблемы с моим партнёром':
         text = 'Обсуди открыто проблемы с партнёром. Попробуйте найти компромисс. Компромисс – это решение конфликта, которое устраивает вас обоих. Иногда нужно отказаться от части своих требований, чтобы прийти к компромиссу. Иногда конфликты бывают такими серьёзными, что нужно расстаться. Расставаться нормально. Можно обсудить проблему с близким человеком. Важно уважать и поддерживать друг друга.'
-    return {
-        'version': event['version'],
-        'session': event['session'],
-        'response': {
-            'text': text,
-            'end_session': 'true'
-        },
-    }
+    return create_response(event, text=text)
 
 
 def teenagers_bored(event, context):
     if 'used_advices_br' not in event['state']['session']:
         event['state']['session']['used_advices_br'] = []
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
-                'value': 'request_teens',
-                'subtopic': event['state']['session']['subtopic']
-            },
-            'response': {
-                'text': end_text,
-                'end_session': 'true'
-            },
-        }
+        return create_response(event, {'value': 'request_teens'}, end_text, [], 'true')
     elif 'YANDEX.CONFIRM' not in event['request']['nlu']['intents']:
-        return {
-            'version': event['version'],
-            'session': event['session'],
-            'session_state': {
-                'value': 'teenagers_briends',
-                'subtopic': event['state']['session']['subtopic'],
-                'used_advices_br': event['state']['session']['used_advices_br']
-            },
-            'response': {
-                'text': 'Извини, не поняла. Тебе нужна идея?',
-                'end_session': 'false'
-            },
-        }
+        return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не поняла. Тебе нужна идея?')
     used_advices_br = event['state']['session']['used_advices_br']
     if len(used_advices_br) == len(advices_br):
         return {
@@ -292,19 +192,10 @@ def teenagers_bored(event, context):
         advice_id = random.randint(0, len(advices_br) - 1)
     used_advices_br.append(advice_id)
     text = advices_br[advice_id] + '\nХочешь ещё одну идею?'
-    return {
-        'version': event['version'],
-        'session': event['session'],
-        'session_state': {
-            'value': 'teenagers_briends',
-            'subtopic': event['state']['session']['subtopic'],
-            'used_advices_br': used_advices_br
-        },
-        'response': {
-            'text': text,
-            'end_session': 'false'
-        },
-    }
+    return create_response(event, {
+        'value': 'teenagers_bored',
+        'used_advices_fr': used_advices_br
+    }, text)
 
 
 def handler(event, context):
