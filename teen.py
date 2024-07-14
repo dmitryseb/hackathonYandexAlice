@@ -6,6 +6,25 @@ from advice_bored import advices_br
 morph = pymorphy3.MorphAnalyzer()
 end_text = "Было приятно пообщаться. Удачи тебе! Оставайся радостными человеком и приятным собеседником."
 
+def have_sense(s, lists_of_key_words):
+    lists_of_norm_forms = [[] for _ in range(len(lists_of_key_words))]
+    for i in range(len(lists_of_key_words)):
+        for w in lists_of_key_words[i]:
+            lists_of_norm_forms[i] += [form.normal_form for form in morph.parse(w)]
+    words = list(map(lambda s1: clear(s1), s.split()))
+    input_norm_forms = []
+    for w in words:
+        input_norm_forms += [form.normal_form for form in morph.parse(w)]
+    found = False
+    res = -1
+    for i in range(len(lists_of_norm_forms)):
+        if found:
+            break
+        if len(set(input_norm_forms).intersection(set(lists_of_norm_forms[i]))) != 0:
+            res = i
+            found = True
+            break
+    return res
 
 def clear(s):
     alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя- "
@@ -40,13 +59,19 @@ def request_teens(event, context, message=''):
 
 
 def teenagers_enter2(event, context):
-    response = event['request']['original_utterance']
+    subtopics = ['Отношения с родителями', 'Школа', 'Друзья', 'Отношения', 'Эмоции']
     subtopic = ''
     value = 'request_teens'
-    if response not in ['Отношения с родителями', 'Школа', 'Друзья', 'Отношения', 'Эмоции']:
+    key_words = [['родители', 'мама', 'папа', 'отец', 'мать'],
+                 ['школа'],
+                 ['друг', 'дружба'],
+                 ['отношения'],
+                 ['эмоции', 'чувства']]
+    res = have_sense(event['request']['original_utterance'], key_words)
+    if res == -1:
         return request_teens(event, context, message='Выбери, пожалуйста, наиболее подходящую тему из списка.')
     else:
-        subtopic = response
+        subtopic = subtopics[res]
         text = 'Можешь рассказать немного больше о проблеме?'
         return {
             'version': event['version'],
@@ -64,40 +89,21 @@ def teenagers_enter2(event, context):
 
 def teenagers_specify(event, context):
     subtopic = event['state']['session']['subtopic']
-    words = list(map(lambda s: clear(s), event['request']['original_utterance'].split()))
-    key_words1 = ['друг', 'дружба', 'дружить']
-    key_words2 = ['любовь', 'любить', 'отношения', 'парень', 'девушка', 'расставание', 'расстаться', 'бросить']
-    key_words3 = ['скучно', 'скучать', 'скука', 'нечего', 'нечем']
-    res = -1
-    for w in words:
-        """if res != -1:
-            break
-        if w in key_words1:
-            res = 1
-        elif w in key_words2:
-            res = 2
-        elif w in key_words3:
-            res = 3"""
-        forms = morph.parse(w)
-        for form in forms:
-            nform = form.normal_form
-            if nform in key_words1:
-                res = 1
-            elif nform in key_words2:
-                res = 2
-            elif nform in key_words3:
-                res = 3
+    key_words = [['друг', 'дружба', 'дружить'],
+                 ['любовь', 'любить', 'отношения', 'парень', 'девушка', 'расставание', 'расстаться', 'бросить'],
+                 ['скучно', 'скучать', 'скука', 'нечего', 'нечем']]
+    res = have_sense(event['request']['original_utterance'], key_words)
     text = 'Извини, я пока не смогу поддержать разговор на эту тему. ' \
            'Вот примеры вопросов, с которыми я могу помочь: как найти друзей, как решить проблему в отношениях или что делать, если скучно.'
     value = 'teenagers_specify'
     buttons = []
-    if res == 1:
+    if res == 0:
         value = 'teenagers_friends'
         text = 'Поняла, тебя интересует, как найти друзей. ' \
                'Давай разберёмся, что такое дружба? Дружба – это регулярное общение и взаимопонимание. ' \
                'Старайся быть откровенным и честным, и ты обязательно найдёшь настоящих друзей. ' \
                'Хочешь, я дам тебе совет, как это сделать?'
-    elif res == 2:
+    elif res == 1:
         value = 'teenagers_love'
         text = 'Поняла, ты хочешь поговорить об отношениях. Пожалуйста, выбери свой случай из списка.'
         buttons = [
@@ -106,7 +112,7 @@ def teenagers_specify(event, context):
             {'title': 'У меня проблемы с моим партнёром'},
             {'title': 'Другой случай'},
         ]
-    elif res == 3:
+    elif res == 2:
         value = 'teenagers_bored'
         text = 'Поняла, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
                'Хочешь идею, чем заняться?'
@@ -186,7 +192,7 @@ def teenagers_friends(event, context):
 
 
 def teenagers_love(event, context, message=''):
-    response = event['request']['original_utterance']
+    response = clear(event['request']['original_utterance'])
     if response == 'Другой случай':
         return {
             'version': event['version'],
@@ -205,7 +211,7 @@ def teenagers_love(event, context, message=''):
                 ]
             },
         }
-    if response not in ['Мне нравится человек, а я ему нет', 'Я нравлюсь человеку, а он мне нет', 'У меня проблемы с моим партнёром']:
+    if response not in ['мне нравится человек а я ему нет', 'я нравлюсь человеку а он мне нет', 'у меня проблемы с моим партнёром']:
         return {
             'version': event['version'],
             'session': event['session'],
@@ -225,11 +231,11 @@ def teenagers_love(event, context, message=''):
             },
         }
     text = ''
-    if response == 'Мне нравится человек, а я ему нет':
+    if response == 'мне нравится человек а я ему нет':
         text = 'Не всегда мы можем понравиться другому человеку, и это нормально. Мы все разные и классные по-своему. Каждый из нас встретит того, кто ему подходит в правильное время. Если кто-то не оценил тебя так, как тебе бы хотелось, это не значит, что с тобой что-то не так. Просто ещё не пришло твоё время и не встретился твой человек.'
-    elif response == 'Я нравлюсь человеку, а он мне нет':
+    elif response == 'я нравлюсь человеку а он мне нет':
         text = 'Не нужно чувствовать себя виноватым из-за этого. Не стоит начинать отношения из чувства жалости или вины. Ты не ответственен за чувства другого человека. Важно найти человека, с которым чувства будут взаимными. Взаимные чувства - это когда люди испытывают к нам ту же эмоцию, что и мы к ним. Бывает, что чувства не взаимны. Когда мы испытываем к людям одну эмоцию, а они к нам совсем другую. Это может быть печально, но жизнь такая.'
-    elif response == 'У меня проблемы с парнем/девушкой':
+    elif response == 'у меня проблемы с моим партнёром':
         text = 'Обсуди открыто проблемы с партнёром. Попробуйте найти компромисс. Компромисс – это решение конфликта, которое устраивает вас обоих. Иногда нужно отказаться от части своих требований, чтобы прийти к компромиссу. Иногда конфликты бывают такими серьёзными, что нужно расстаться. Расставаться нормально. Можно обсудить проблему с близким человеком. Важно уважать и поддерживать друг друга.'
     return {
         'version': event['version'],
