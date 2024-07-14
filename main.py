@@ -1,8 +1,6 @@
 import random
 from teen import *
 
-age = 0
-
 
 def request_kids(event, context, message=""):
     text = "Хорошо! Давай поболтаем! Выбери, с чем я могу тебе помочь!"
@@ -13,11 +11,10 @@ def request_kids(event, context, message=""):
                {"title": "Друзья"},
                {"title": "Самочувствие"},
                {"title": "Плохое настроение, давай поиграем в игру!"}]
-    global age
     return {
         "version": event["version"],
         "session": event["session"],
-        "session_state": {"value": "answer kids", "age": age},
+        "session_state": {"value": "answer kids"},
         "response": {
             "text": text,
             "end_session": "false",
@@ -37,8 +34,6 @@ def answer_kids(event, context, message=""):
         if answers.index(event["request"]["nlu"]["tokens"]) == 4:
             event.pop("request")
             return relax_game(event, context, message)
-        global age
-        event["state"]["session"]["age"] = age
         return {
             "version": event["version"],
             "session": event["session"],
@@ -65,7 +60,6 @@ starts = ['А ты ', 'Ну ты и ', 'Вот ты ', 'Вот же ты ']
 
 
 def relax_game(event, context, message=""):
-    global age
     text = 'Привет! Давай поиграем в обзывашки: по очереди будем называть друг друга разными овощами. Если тебе ' \
            'наскучит, то ты всегда можешь написать: давай закончим. Я начну: Ты ' \
            'огурец! '
@@ -74,6 +68,7 @@ def relax_game(event, context, message=""):
             and len(event['request']['original_utterance']) > 0:
         if "давай" in event['request']['original_utterance'].lower() and "закончим" in event['request'][
             'original_utterance'].lower():
+            age = int(event["state"]["session"]["age"])
             if 12 > age:
                 return request_kids(event, context, message)
             elif 16 >= age:
@@ -95,7 +90,7 @@ def relax_game(event, context, message=""):
     return {
         'version': event['version'],
         'session': event['session'],
-        "session_state": {"value": "relax game", "age": age},
+        "session_state": {"value": "relax game"},
         'response': {
             # Respond with the original request or welcome the user if this is the beginning of the dialog and the
             # request has not yet been made.
@@ -112,11 +107,10 @@ def request_adults(event, context, message=""):
         text = message
     buttons = [{"title": "Отношения с ребёнком"},
                {"title": "Его чувства и эмоции"}]
-    global age
     return {
         "version": event["version"],
         "session": event["session"],
-        "session_state": {"value": "answer adults", "age": age},
+        "session_state": {"value": "answer adults"},
         "response": {
             "text": text,
             "end_session": "false",
@@ -128,15 +122,13 @@ def request_adults(event, context, message=""):
 def answer_adults(event, context, message=""):
     answers = ["Отношения с ребёнком".lower().split(),
                "Его чувства и эмоции".lower().split()]
-    global age
-    event["state"]["session"] = age
 
     if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
             event["request"]["nlu"]["tokens"] in answers:
         return {
             "version": event["version"],
             "session": event["session"],
-            "session_state": {"value": "answer adults", "age": age},
+            "session_state": {"value": "answer adults"},
             "response": {
                 "text": "Извините, я пока не могу помочь с этим вопросом.",
             },
@@ -147,10 +139,16 @@ def answer_adults(event, context, message=""):
 
 def request_age(event, context, message=""):
     if "request" in event and "original_utterance" in event["request"] and len(
-            event["request"]["original_utterance"]) and event["request"][
-        "original_utterance"].isdigit():
-        global age
-        age = int(event["request"]["original_utterance"])
+            event["request"]["original_utterance"]):
+        age = -1
+        if event["request"]["original_utterance"].isdigit():
+            age = int(event["request"]["original_utterance"])
+        elif "nlu" in event["request"] and "entities" in event["request"]["nlu"] and len(
+                event["request"]["nlu"]["entities"]) and "value" in event["request"]["nlu"][
+            "entities"][0] and event["request"]["nlu"]["entities"][0]["type"] == "YANDEX.NUMBER":
+
+            age = event["request"]["nlu"]["entities"][0]["value"]
+
         if not 99 >= age >= 0:
             text = "Некорректный ответ. Пожалуйста, введите что-то другое."
             return {
@@ -180,6 +178,40 @@ def request_age(event, context, message=""):
     }
 
 
+def show_manual(event, context, message=""):
+    return {
+        "version": event["version"],
+        "session": event["session"],
+        "session_state": {"value": "request age"},
+        "response": {
+            "text": "Я могу помочь с психологическими вопросами, которые тебя беспокоят. Прежде чем мы начнём, уточни, пожалуйста, сколько тебе лет?",
+            "end_session": "false"
+        },
+    }
+
+
+def show_topics(event, context, message=""):
+    age = -1
+    if "age" in event["state"]["session"]:
+        age = int(event["state"]["session"]["age"])
+    if 12 > age >= 0:
+        return request_kids(event, context)
+    elif 16 >= age:
+        return request_teens(event, context)
+    elif 99 >= age > 16:
+        return request_adults(event, context)
+    else:
+        return {
+            "version": event["version"],
+            "session": event["session"],
+            "session_state": {"value": "request age"},
+            "response": {
+                "text": "Я могу помочь с психологическими вопросами, которые тебя беспокоят. Прежде чем мы начнём, уточни, пожалуйста, сколько тебе лет?",
+                "end_session": "false"
+            },
+        }
+
+
 functions = dict()
 functions["request age"] = request_age
 functions["answer kids"] = answer_kids
@@ -191,17 +223,11 @@ functions['teenagers_love'] = teenagers_love
 functions['teenagers_bored'] = teenagers_bored
 functions['request_teens'] = request_teens
 functions['teenagers_enter2'] = teenagers_enter2
+functions["show_manual"] = show_manual
+functions["show_topics"] = show_topics
 
 
-def handler(event, context):  # функция для точки входа
-    """
-    Entry-point for Serverless Function.
-    :param event: request payload.
-    :param context: information about current execution context.
-    :return: response to be serialized as JSON.
-    """
-
-    """Если состояние не является начальным, то вызываем побочную функцию"""
+def check_reference(event):
     if len(event['request']['original_utterance']) > 0:
         words = list(map(lambda s: clear(s), event['request']['original_utterance'].split()))
         key_words = ['помощь', 'помочь', 'уметь']
@@ -215,21 +241,51 @@ def handler(event, context):  # функция для точки входа
                 if nform in key_words:
                     res = True
         if res:
-            return {
-                "version": event["version"],
-                "session": event["session"],
-                "session_state": {"value": "request age"},
-                "response": {
-                    "text": "Я могу помочь с психологическими вопросами, которые тебя беспокоят. Прежде чем мы начнём, уточни, пожалуйста, сколько тебе лет?",
-                    "end_session": "false"
-                },
-            }
+            event["state"]["session"]["value"] = "show_manual"
+            return
+
+        key_words = ["вернуть", "вернуться", "покажи", "возвращаться"]
+        fl1 = False
+        for w in words:
+            forms = morph.parse(w)
+            for form in forms:
+                nform = form.normal_form
+                if nform.lower() in key_words:
+                    fl1 = True
+        fl2 = False
+        key_words = ["тема", "начало"]
+        for w in words:
+            forms = morph.parse(w)
+            for form in forms:
+                nform = form.normal_form
+                if nform.lower() in key_words:
+                    fl2 = True
+        if fl1 and fl2:
+            event["state"]["session"]["value"] = "show_topics"
+            return
+
+
+def handler(event, context):  # функция для точки входа
+    """
+    Entry-point for Serverless Function.
+    :param event: request payload.
+    :param context: information about current execution context.
+    :return: response to be serialized as JSON.
+    """
+
+    """Если состояние не является начальным, то вызываем побочную функцию"""
+
+    check_reference(event)
+
     if "value" in event["state"]["session"]:
         if event["state"]["session"]["value"] in functions.keys():
+            age = -1
             if "age" in event["state"]["session"]:
-                global age
                 age = int(event["state"]["session"]["age"])
-            return functions[event["state"]["session"]["value"]].__call__(event, context)
+            res = functions[event["state"]["session"]["value"]].__call__(event, context)
+            res["session_state"]["age"] = age
+            return res
+
         else:
             return {
                 "version": event["version"],
