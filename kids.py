@@ -1,5 +1,5 @@
 from relax_game import relax_game
-from useful_functions import create_response
+from useful_functions import create_response, clear
 from school_game import school_game
 
 
@@ -16,22 +16,28 @@ def request_kids(event, context, message=""):
 
 
 def answer_kids(event, context, message=""):
-    answers = ["Отношения с мамой или папой".lower().split(),
-               "Школа".lower().split(),
-               "Друзья".lower().split(), "Самочувствие".lower().split(),
-               "Плохое настроение давай поиграем в игру".lower().split()]
+    answers = ["Отношения с мамой или папой",
+               "Школа",
+               "Друзья", "Самочувствие",
+               "Давай повеселимся!"]
 
-    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers:
-        if answers.index(event["request"]["nlu"]["tokens"]) == 4:
-            event.pop("request")
-            return relax_game(event, context, message)
-        elif answers.index(event["request"]["nlu"]["tokens"]) == 1:
-            return school_questions(event, context)
-        return create_response(event,
-                               text="выбран вариант номер " + str(answers.index(event["request"]["nlu"]["tokens"]) + 1))
-    message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return request_kids(event, context, message)
+    res = -1
+    if "request" in event and "original_utterance" in event["request"]:
+        for i in range(len(answers)):
+            if clear(answers[i]) == clear(event["request"]["original_utterance"]):
+                res = i
+                break
+    if res == 4:
+        event.pop("request")
+        return relax_game(event, context, message)
+    elif res == 1:
+        return school_questions(event, context)
+    elif res == -1:
+        message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
+        return request_kids(event, context, message)
+    return create_response(event,
+                           text="выбран вариант номер " + str(answers.index(event["request"]["nlu"]["tokens"]) + 1))
+
 
 
 def school_questions(event, context, message=""):
