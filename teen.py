@@ -1,58 +1,9 @@
 import random
-import pymorphy3
 from advice_friendship import advices_fr
 from advice_bored import advices_br
+from useful_functions import create_response, have_sense, clear
 
-morph = pymorphy3.MorphAnalyzer()
 end_text = "Было приятно пообщаться. Удачи тебе! Оставайся радостными человеком и приятным собеседником."
-
-
-def have_sense(s, lists_of_key_words):
-    lists_of_norm_forms = [[] for _ in range(len(lists_of_key_words))]
-    for i in range(len(lists_of_key_words)):
-        for w in lists_of_key_words[i]:
-            lists_of_norm_forms[i] += [form.normal_form for form in morph.parse(w)]
-    words = list(map(lambda s1: clear(s1), s.split()))
-    input_norm_forms = []
-    for w in words:
-        input_norm_forms += [form.normal_form for form in morph.parse(w)]
-    res = -1
-    for i in range(len(lists_of_norm_forms)):
-        if len(set(input_norm_forms).intersection(set(lists_of_norm_forms[i]))) != 0:
-            res = i
-            break
-    return res
-
-
-def clear(s):
-    alph = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя- "
-    s = s.lower().strip()
-    s = "".join([c for c in s if c in alph])
-    return s
-
-
-def create_response(event, change_in_state={}, text="", buttons=[], end_session='false'):
-    session_state = event['state']['session']
-    for prop in change_in_state:
-        session_state[prop] = change_in_state[prop]
-    tts = text
-    if len(buttons) != 0:
-        tts += " Варианты ответа: "
-        for button in buttons:
-            tts += button['title'] + ', '
-        tts = tts[:-2]
-        tts += '.'
-    return {
-        'version': event['version'],
-        'session': event['session'],
-        'session_state': session_state,
-        'response': {
-            'text': text,
-            'tts': tts,
-            'end_session': end_session,
-            'buttons': buttons
-        },
-    }
 
 def request_teens(event, context, message=''):
     text = 'Хорошо! Давай поговорим! Выбери, с чем я могу тебе помочь!'
@@ -75,11 +26,11 @@ def teenagers_enter2(event, context):
                  ['друг', 'дружба'],
                  ['отношения'],
                  ['эмоции', 'чувства']]
-    res = have_sense(event['request']['original_utterance'], key_words)
-    if res == -1:
+    senses = have_sense(event['request']['original_utterance'], key_words)
+    if True not in senses:
         return request_teens(event, context, message='Выбери, пожалуйста, наиболее подходящую тему из списка.')
     else:
-        subtopic = subtopics[res]
+        subtopic = subtopics[senses.index(True)]
         text = 'Можешь рассказать немного больше о проблеме?'
         return create_response(event, {
                 'value': 'teenagers_specify',
@@ -92,18 +43,18 @@ def teenagers_specify(event, context):
     key_words = [['друг', 'дружба', 'дружить'],
                  ['любовь', 'любить', 'отношения', 'парень', 'девушка', 'расставание', 'расстаться', 'бросить'],
                  ['скучно', 'скучать', 'скука', 'нечего', 'нечем']]
-    res = have_sense(event['request']['original_utterance'], key_words)
+    senses = have_sense(event['request']['original_utterance'], key_words)
     text = 'Извини, я пока не смогу поддержать разговор на эту тему. ' \
            'Вот примеры вопросов, с которыми я могу помочь: как найти друзей, как решить проблему в отношениях или что делать, если скучно.'
     value = 'teenagers_specify'
     buttons = []
-    if res == 0:
+    if senses[0]:
         value = 'teenagers_friends'
         text = 'Поняла, тебя интересует, как найти друзей. ' \
                'Давай разберёмся, что такое дружба? Дружба – это регулярное общение и взаимопонимание. ' \
                'Старайся быть откровенным и честным, и ты обязательно найдёшь настоящих друзей. ' \
                'Хочешь, я дам тебе совет, как это сделать?'
-    elif res == 1:
+    elif senses[1]:
         value = 'teenagers_love'
         text = 'Поняла, ты хочешь поговорить об отношениях. Пожалуйста, выбери свой случай из списка.'
         buttons = [
@@ -112,7 +63,7 @@ def teenagers_specify(event, context):
             {'title': 'У меня проблемы с моим партнёром'},
             {'title': 'Другой случай'},
         ]
-    elif res == 2:
+    elif senses[2]:
         value = 'teenagers_bored'
         text = 'Поняла, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
                'Хочешь идею, чем заняться?'
@@ -126,7 +77,7 @@ def teenagers_friends(event, context):
     if 'used_advices_fr' not in event['state']['session']:
         event['state']['session']['used_advices_fr'] = []
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
-        return create_response(event, {'value': 'request_teens'}, end_text, [], 'true')
+        return create_response(event, {'value': 'request_teens'}, end_text)
     elif 'YANDEX.CONFIRM' not in event['request']['nlu']['intents']:
         return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не поняла. Тебе нужен совет?')
     used_advices_fr = event['state']['session']['used_advices_fr']
@@ -174,7 +125,7 @@ def teenagers_bored(event, context):
     if 'used_advices_br' not in event['state']['session']:
         event['state']['session']['used_advices_br'] = []
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
-        return create_response(event, {'value': 'request_teens'}, end_text, [], 'true')
+        return create_response(event, {'value': 'request_teens'}, end_text)
     elif 'YANDEX.CONFIRM' not in event['request']['nlu']['intents']:
         return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не поняла. Тебе нужна идея?')
     used_advices_br = event['state']['session']['used_advices_br']
