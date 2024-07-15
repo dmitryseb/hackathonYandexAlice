@@ -4,14 +4,14 @@ from school_game import school_game
 
 
 def request_kids(event, context, message=""):
-    text = "Хорошо! Давай поболтаем! Выбери, с чем я могу тебе помочь!"
+    text = "Хорошо! Давай поболтаем! Выбери, с чем я могу тебе помочь."
     if message:
         text = message
     buttons = [{"title": "Отношения с мамой или папой"},
                {"title": "Школа"},
                {"title": "Друзья"},
                {"title": "Самочувствие"},
-               {"title": "Плохое настроение, давай поиграем в игру!"}]
+               {"title": "Давай повеселимся!"}]
     return create_response(event, {"value": "answer_kids"}, text, buttons)
 
 

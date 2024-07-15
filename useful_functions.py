@@ -49,8 +49,9 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
         tts += '.'
 
     buttons += [
-        {"title": 'Вернуться к вводу возраста', "payload": {}, "hide": "true"},
-        {"title": 'Вернуться к выбору темы', "payload": {}, "hide": "true"},
+        {"title": 'Вернуться к вводу возраста', "hide": "true"},
+        {"title": 'Вернуться к выбору темы', "hide": "true"},
+        {"title": 'Помощь', "hide": "true"},
     ]
     return {
         'version': event['version'],
