@@ -24,6 +24,14 @@ def clear(s):
     return s
 
 
+def remain_letters(s: str):
+    res = ""
+    for i in s:
+        if i == " " or i.isalpha():
+            res += i
+    return res
+
+
 def create_response(event, change_in_state=None, text="", buttons=None, end_session='false'):
     if change_in_state is None:
         change_in_state = {}

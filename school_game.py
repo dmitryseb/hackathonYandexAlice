@@ -1,12 +1,4 @@
-from useful_functions import create_response
-
-
-def remain_letters(s: str):
-    res = ""
-    for i in s:
-        if i == " " or i.isalpha():
-            res += i
-    return res
+from useful_functions import create_response, remain_letters
 
 
 def begin_type(event, context, message=""):
