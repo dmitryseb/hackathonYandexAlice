@@ -18,16 +18,7 @@ def begin_type(event, context, message=""):
         text = 'Женя, Маша и Аня - прилежные ученики, поэтому они занимают своё место. А Антон и Илья - известные хулиганы, поэтому они продолжают бегать и шуметь. \n Твои действия:'
         buttons = [{"title": "Сделать им замечание строгим тоном."},
                    {"title": "Выгнать их из класса."}]
-        return {
-            "version": event["version"],
-            "session": event["session"],
-            "session_state": {"value": "chill_start"},
-            "response": {
-                "text": text,
-                "end_session": "false",
-                "buttons": buttons
-            },
-        }
+        return create_response(event, {"value": "chill_start"}, text=text, buttons=buttons)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
     return begin_type(event, context, message)
 
@@ -50,16 +41,7 @@ def nach(text, event, context, message=""):
     buttons = [{"title": "Проведу контрольную работу, чтобы проверить, как ученики усвоили материал."},
                {"title": "Сегодня ещё раз коротко повторим всю тему, а на следующем уроке будет контрольная."},
                {"title": "Проверю у учеников домашнее задание, чтобы узнать, всё ли им было понятно."}]
-    return {
-        "version": event["version"],
-        "session": event["session"],
-        "session_state": {"value": "urok"},
-        "response": {
-            "text": text,
-            "end_session": "false",
-            "buttons": buttons
-        },
-    }
+    return create_response(event, {"value": "urok"}, text=text, buttons=buttons)
 
 
 def urok(event, context, message=""):
@@ -85,17 +67,7 @@ def urok(event, context, message=""):
             buttons = [{"title": "Женю"},
                        {"title": "Илью"}]
             val = "dz"
-
-        return {
-            "version": event["version"],
-            "session": event["session"],
-            "session_state": {"value": val},
-            "response": {
-                "text": text,
-                "end_session": "false",
-                "buttons": buttons
-            },
-        }
+        return create_response(event, {"value": val}, text=text, buttons=buttons)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
     return urok(event, context, message)
 
@@ -152,14 +124,4 @@ def school_game(event, context, message=""):
                {"title": "Начну кричать на них, чтобы они перестали бегать."},
                {"title": "Скажу, что поставлю всем двойки, если они не успокоятся"},
                {"title": "Уйду из класса, дети сами проведут урок."}]
-
-    return {
-        "version": event["version"],
-        "session": event["session"],
-        "session_state": {"value": "begin_type"},
-        "response": {
-            "text": text,
-            "end_session": "false",
-            "buttons": buttons
-        },
-    }
+    return create_response(event, {"value": "begin_type"}, text=text, buttons=buttons)
