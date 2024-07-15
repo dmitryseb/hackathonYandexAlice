@@ -5,9 +5,18 @@ from useful_functions import create_response
 
 
 def request_age(event, context, message=""):
+    text = "Пожалуйста, введите Ваш возраст (целое число от 0 до 99)."
+    if message != "":
+        text = message
+    return create_response(event, change_in_state={"value": "proceed_age"}, text=text)
+
+
+def proceed_age(event, context, message=""):
     if "request" in event and "original_utterance" in event["request"] and len(
             event["request"]["original_utterance"]):
         age = -1
+        if "age" in event["state"]["session"]:
+            age = event["state"]["session"]["age"]
         if event["request"]["original_utterance"].isdigit():
             age = int(event["request"]["original_utterance"])
         elif "nlu" in event["request"] and "entities" in event["request"]["nlu"] and len(
@@ -25,20 +34,19 @@ def request_age(event, context, message=""):
             return request_teens(event, context, message)
         elif 17 <= age <= 99:
             return request_adults(event, context, message)
-    text = "Пожалуйста, введите Ваш возраст (целое число от 0 до 99)."
-    return create_response(event, text=text)
+    return request_age(event, context, message=message)
 
 
 def show_manual(event, context, message=""):
-    return create_response(event,
+    return create_response(event, change_in_state={"value": event["state"]["session"]["prev_value"]},
                            text="Я могу помочь с психологическими вопросами, которые тебя беспокоят. "
-                                "Чтобы ввести свой возраст - скажи \"Заново\" или нажми кнопку снизу. "
-                                "Чтобы выбрать тему для общения - скажи \"Выбор темы\" или нажми кнопку снизу. "
+                                "Чтобы ввести свой возраст, скажи \"Вернуться к вводу возраста\" или нажми кнопку снизу. "
+                                "Чтобы выбрать тему для общения, скажи \"Вернуться к выбору темы\" или нажми кнопку снизу. "
                            )
 
 
 def show_what_can_you_do(event, context, message=""):
-    return create_response(event,
+    return create_response(event, change_in_state={"value": event["state"]["session"]["prev_value"]},
                            text="Я могу помочь с психологическими вопросами, которые тебя беспокоят."
                            )
 

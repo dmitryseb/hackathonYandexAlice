@@ -1,5 +1,5 @@
 from adults import answer_adults
-from ages_node import request_age, show_manual, show_what_can_you_do, show_topics
+from ages_node import request_age, proceed_age, show_manual, show_what_can_you_do, show_topics
 from kids import school_answers, request_kids, answer_kids
 from relax_game import relax_game
 from teen import *
@@ -8,6 +8,7 @@ from school_game import school_game, begin_type, chill_start, urok, contra, obya
 
 functions = dict()
 functions["request_age"] = request_age
+functions["proceed_age"] = proceed_age
 functions["answer_kids"] = answer_kids
 functions["answer_adults"] = answer_adults
 functions["relax_game"] = relax_game
@@ -37,15 +38,18 @@ def check_reference(event):
                      ['уметь'],
                      ['вернуть', 'вернуться', 'покажи', 'возвращаться'],
                      ['тема', 'начало'],
-                     ['возраст']]
+                     ['возраст'],
+                     ['заново']]
         senses = have_sense(event['request']['original_utterance'], key_words)
         if senses[0]:
+            event["state"]["session"]["prev_value"] = event["state"]["session"]["value"]
             event["state"]["session"]["value"] = "show_manual"
         elif senses[1]:
+            event["state"]["session"]["prev_value"] = event["state"]["session"]["value"]
             event["state"]["session"]["value"] = "show_what_can_you_do"
         elif senses[2] and senses[3]:
             event["state"]["session"]["value"] = "show_topics"
-        elif senses[2] and senses[4]:
+        elif senses[2] and senses[4] or senses[5]:
             event["state"]["session"]["value"] = "request_age"
 
 
@@ -75,4 +79,4 @@ def handler(event, context):  # функция для точки входа
             return create_response(event, text="Некорректное состояние", end_session='true')
 
     text = "Привет! Я могу помочь с психологическими вопросами, которые тебя беспокоят. Прежде чем мы начнём, уточни, пожалуйста, сколько тебе лет?"
-    return create_response(event, {"value": "request_age"}, text)
+    return request_age(event, context, message=text)
