@@ -1,6 +1,15 @@
 from useful_functions import create_response, remain_letters
 
 
+def begin_type_proc(event, context, message):
+    text = 'Женя, Маша и Аня - прилежные ученики, поэтому они занимают своё место. А Антон и Илья - известные хулиганы, поэтому они продолжают бегать и шуметь. \n Твои действия:'
+    if message:
+        text = message + " " + text
+    buttons = [{"title": "Сделать им замечание строгим тоном."},
+               {"title": "Выгнать их из класса."}]
+    return create_response(event, {"value": "chill_start"}, text=text, buttons=buttons)
+
+
 def begin_type(event, context, message=""):
     answers = [remain_letters("Попрошу всех спокойно занять своё место.").lower().split(),
                remain_letters("Начну кричать на них, чтобы они перестали бегать.").lower().split(),
@@ -15,12 +24,9 @@ def begin_type(event, context, message=""):
         elif answers.index(event["request"]["nlu"]["tokens"]) > 0:
             text = 'Дети испуганно рассаживаются на место и затихают. Урок начинается. \n'
             return nach(text, event, context, message)
-        text = 'Женя, Маша и Аня - прилежные ученики, поэтому они занимают своё место. А Антон и Илья - известные хулиганы, поэтому они продолжают бегать и шуметь. \n Твои действия:'
-        buttons = [{"title": "Сделать им замечание строгим тоном."},
-                   {"title": "Выгнать их из класса."}]
-        return create_response(event, {"value": "chill_start"}, text=text, buttons=buttons)
+        return begin_type_proc(event, context, message)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return begin_type(event, context, message)
+    return school_game(event, context, message)
 
 
 def chill_start(event, context, message=""):
@@ -33,7 +39,7 @@ def chill_start(event, context, message=""):
             text = 'Услышав строгий тон, Антон и Илья тоже успокаиваются и занимают свои места. \n'
         return nach(text, event, context, message)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return chill_start(event, context, message)
+    return begin_type_proc(event, context, message)
 
 
 def nach(text, event, context, message=""):
@@ -42,6 +48,33 @@ def nach(text, event, context, message=""):
                {"title": "Сегодня ещё раз коротко повторим всю тему, а на следующем уроке будет контрольная."},
                {"title": "Проверю у учеников домашнее задание, чтобы узнать, всё ли им было понятно."}]
     return create_response(event, {"value": "urok"}, text=text, buttons=buttons)
+
+
+def urok_req_contra(event, context, message=""):
+    text = 'Дети начинают выполнять задания. На середине контрольной ты слышишь, как Маша спрашивает у Жени ответы. Как ты поступишь?'
+    text = message + text
+    buttons = [{"title": "Сделаю вид, что ничего не было."},
+               {"title": "Скажу Маше, чтобы выполняла работу самостоятельно."}]
+    val = "contra"
+    return create_response(event, {"value": val}, text=text, buttons=buttons)
+
+
+def urok_req_obyasn(event, context, message=""):
+    text = 'Ты начинаешь объяснять материал, но скоро ты слышишь, как Аня громко разговаривает с Машей. Что будешь делать?'
+    text = message + text
+    buttons = [{"title": "Продолжу объяснять несмотря на шум."},
+               {"title": "Сделаю замечание, чтобы они разговаривали тихо."}]
+    val = "obyasn"
+    return create_response(event, {"value": val}, text=text, buttons=buttons)
+
+
+def urok_req_dz(event, context, message=""):
+    text = 'На вопрос, кто сделал домашнюю работу, руку поднимает только Женя. Ты знаешь, что у Ильи больше всех проблем с текущим материалом. Кого вызовешь к доске?'
+    text = message + text
+    buttons = [{"title": "Женю"},
+               {"title": "Илью"}]
+    val = "dz"
+    return create_response(event, {"value": val}, text=text, buttons=buttons)
 
 
 def urok(event, context, message=""):
@@ -53,23 +86,13 @@ def urok(event, context, message=""):
 
     if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
             event["request"]["nlu"]["tokens"] in answers:
-        text = 'Дети начинают выполнять задания. На середине контрольной ты слышишь, как Маша спрашивает у Жени ответы. Как ты поступишь?'
-        buttons = [{"title": "Сделаю вид, что ничего не было."},
-                   {"title": "Скажу Маше, чтобы выполняла работу самостоятельно."}]
-        val = "contra"
         if answers.index(event["request"]["nlu"]["tokens"]) == 1:
-            text = 'Ты начинаешь объяснять материал, но скоро ты слышишь, как Аня громко разговаривает с Машей. Что будешь делать?'
-            buttons = [{"title": "Продолжу объяснять несмотря на шум."},
-                       {"title": "Сделаю замечание, чтобы они разговаривали тихо."}]
-            val = "obyasn"
+            return urok_req_obyasn(event, context)
         elif answers.index(event["request"]["nlu"]["tokens"]) == 2:
-            text = 'На вопрос, кто сделал домашнюю работу, руку поднимает только Женя. Ты знаешь, что у Ильи больше всех проблем с текущим материалом. Кого вызовешь к доске?'
-            buttons = [{"title": "Женю"},
-                       {"title": "Илью"}]
-            val = "dz"
-        return create_response(event, {"value": val}, text=text, buttons=buttons)
+            return urok_req_dz(event, context)
+        return urok_req_contra(event, context)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return urok(event, context, message)
+    return nach(event, context, message)
 
 
 def contra(event, context, message=""):
@@ -82,7 +105,7 @@ def contra(event, context, message=""):
             text = 'Маша смущённо смотрит в свою работу. В конце урока все сдают работы, и после проверки выясняется, что тему хорошо усвоил только Женя. Теперь тебе легче будет спланировать следующие уроки, чтобы все ученики разобрались в теме. \n'
         return konec(text, event, context, message)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return chill_start(event, context, message)
+    return urok_req_contra(event, context, message)
 
 
 def obyasn(event, context, message=""):
@@ -95,7 +118,7 @@ def obyasn(event, context, message=""):
             text = 'На следующем уроке все пишут контрольную, и у всех хорошие результаты! Директор поздравляет тебя с тем, что все ученики так хорошо освоили трудную тему, и выдаёт премию. Отличная работа! \n'
         return konec(text, event, context, message)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return chill_start(event, context, message)
+    return urok_req_obyasn(event, context, message)
 
 
 def dz(event, context, message=""):
@@ -108,7 +131,7 @@ def dz(event, context, message=""):
             text = 'Илья выходит к доске, и ты вместе с классом помогаешь ему разобраться в домашнем задании. На следующем уроке все пишут контрольную, и у всех отличные результаты! Директор поздравляет тебя с тем, что все ученики так хорошо освоили трудную тему и выдаёт премию. Отличная работа! \n'
         return konec(text, event, context, message)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return chill_start(event, context, message)
+    return urok_req_dz(event, context, message)
 
 
 def konec(text, event, context, message=""):
@@ -120,6 +143,7 @@ def school_game(event, context, message=""):
     text = 'Предлагаю тебе взглянуть на школу по-новому. Представь, что ты школьный учитель, которому предстоит сейчас провести урок. ' \
            'Ты заходишь в класс и видишь своих учеников: Илью, Антона, Женю, Аню и Машу. Звонок уже прозвенел, но дети всё ещё носятся по классу. \n' \
            'Как ты начнёшь урок?'
+    text = message + " " + text
     buttons = [{"title": "Попрошу всех спокойно занять своё место."},
                {"title": "Начну кричать на них, чтобы они перестали бегать."},
                {"title": "Скажу, что поставлю всем двойки, если они не успокоятся"},
