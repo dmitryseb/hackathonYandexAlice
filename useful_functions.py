@@ -1,5 +1,7 @@
 import pymorphy3
+
 morph = pymorphy3.MorphAnalyzer()
+
 
 def have_sense(s, lists_of_key_words):
     lists_of_norm_forms = [[] for _ in range(len(lists_of_key_words))]
@@ -10,7 +12,8 @@ def have_sense(s, lists_of_key_words):
     input_norm_forms = []
     for w in words:
         input_norm_forms += [form.normal_form for form in morph.parse(w)]
-    res = [len(set(input_norm_forms).intersection(set(list_of_norm_forms))) != 0 for list_of_norm_forms in lists_of_norm_forms]
+    res = [len(set(input_norm_forms).intersection(set(list_of_norm_forms))) != 0 for list_of_norm_forms in
+           lists_of_norm_forms]
     return res
 
 
