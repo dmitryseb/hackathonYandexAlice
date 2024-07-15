@@ -39,7 +39,6 @@ def answer_kids(event, context, message=""):
                            text="выбран вариант номер " + str(answers.index(event["request"]["nlu"]["tokens"]) + 1))
 
 
-
 def school_questions(event, context, message=""):
     text = "Хорошо. Давай поговорим про школу. Вот, что я могу тебе предложить:"
     if message:
@@ -58,4 +57,4 @@ def school_answers(event, context, message=""):
         return create_response(event,
                                text="выбран вариант номер " + str(answers.index(event["request"]["nlu"]["tokens"]) + 1))
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
-    return request_kids(event, context, message)
+    return school_questions(event, context, message)
