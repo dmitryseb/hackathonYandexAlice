@@ -5,6 +5,7 @@ from useful_functions import create_response, have_sense, clear
 
 end_text = "Было приятно пообщаться. Удачи тебе! Оставайся радостными человеком и приятным собеседником."
 
+
 def request_teens(event, context, message=''):
     text = 'Хорошо! Давай поговорим! Выбери, с чем я могу тебе помочь!'
     if message != '':
@@ -33,9 +34,9 @@ def teenagers_enter2(event, context):
         subtopic = subtopics[senses.index(True)]
         text = 'Можешь рассказать немного больше о проблеме?'
         return create_response(event, {
-                'value': 'teenagers_specify',
-                'subtopic': subtopic,
-            }, text)
+            'value': 'teenagers_specify',
+            'subtopic': subtopic,
+        }, text)
 
 
 def teenagers_specify(event, context):
@@ -68,9 +69,9 @@ def teenagers_specify(event, context):
         text = 'Поняла, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
                'Хочешь идею, чем заняться?'
     return create_response(event, {
-            'value': value,
-            'subtopic': subtopic
-        }, text, buttons)
+        'value': value,
+        'subtopic': subtopic
+    }, text, buttons)
 
 
 def teenagers_friends(event, context):
@@ -91,18 +92,21 @@ def teenagers_friends(event, context):
     return create_response(event, {
         'value': 'teenagers_friends',
         'used_advices_fr': used_advices_fr
-    }, text)
+    }, text, name_to_photo="friends")
 
 
 def teenagers_love(event, context, message=''):
     response = clear(event['request']['original_utterance'])
     if response == 'другой случай':
-        return create_response(event, text="Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.", buttons=[
-                    {'title': 'Мне нравится человек, а я ему нет'},
-                    {'title': 'Я нравлюсь человеку, а он мне нет'},
-                    {'title': 'У меня проблемы с моим партнёром'},
-                ])
-    if response not in ['мне нравится человек а я ему нет', 'я нравлюсь человеку а он мне нет', 'у меня проблемы с моим партнёром']:
+        return create_response(event,
+                               text="Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.",
+                               buttons=[
+                                   {'title': 'Мне нравится человек, а я ему нет'},
+                                   {'title': 'Я нравлюсь человеку, а он мне нет'},
+                                   {'title': 'У меня проблемы с моим партнёром'},
+                               ])
+    if response not in ['мне нравится человек а я ему нет', 'я нравлюсь человеку а он мне нет',
+                        'у меня проблемы с моим партнёром']:
         return create_response(event,
                                text="Пожалуйста, выбери из предложенных вариантов. ",
                                buttons=[
@@ -118,7 +122,7 @@ def teenagers_love(event, context, message=''):
         text = 'Не нужно чувствовать себя виноватым из-за этого. Не стоит начинать отношения из чувства жалости или вины. Ты не ответственен за чувства другого человека. Важно найти человека, с которым чувства будут взаимными. Взаимные чувства - это когда люди испытывают к нам ту же эмоцию, что и мы к ним. Бывает, что чувства не взаимны. Когда мы испытываем к людям одну эмоцию, а они к нам совсем другую. Это может быть печально, но жизнь такая.'
     elif response == 'у меня проблемы с моим партнёром':
         text = 'Обсуди открыто проблемы с партнёром. Попробуйте найти компромисс. Компромисс – это решение конфликта, которое устраивает вас обоих. Иногда нужно отказаться от части своих требований, чтобы прийти к компромиссу. Иногда конфликты бывают такими серьёзными, что нужно расстаться. Расставаться нормально. Можно обсудить проблему с близким человеком. Важно уважать и поддерживать друг друга.'
-    return create_response(event, text=text)
+    return create_response(event, text=text, name_to_photo="relationship")
 
 
 def teenagers_bored(event, context):
@@ -146,7 +150,7 @@ def teenagers_bored(event, context):
     return create_response(event, {
         'value': 'teenagers_bored',
         'used_advices_fr': used_advices_br
-    }, text)
+    }, text, name_to_photo="boring")
 
 
 def handler(event, context):

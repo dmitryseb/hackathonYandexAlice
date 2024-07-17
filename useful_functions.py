@@ -32,7 +32,16 @@ def remain_letters(s: str):
     return res
 
 
-def create_response(event, change_in_state=None, text="", buttons=None, end_session='false'):
+photo_ids = dict()
+photo_ids["relax_game"] = "13200873/a599c9b034f404575e46"
+photo_ids["relationship"] = "213044/54b0a77551a367672dcf"
+photo_ids["friends"] = "1521359/62ed0aa415f6607e6cdf"
+photo_ids["advices"] = "997614/6f1586529c708c810b60"
+photo_ids["school_game"] = "213044/eb72d04e42b2789b2ce6"
+photo_ids["boring"] = "997614/f52f1a803dffc62753b6"
+
+
+def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo=""):
     if change_in_state is None:
         change_in_state = {}
     if buttons is None:
@@ -53,7 +62,8 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
         {"title": 'Вернуться к выбору темы', "hide": "true"},
         {"title": 'Помощь', "hide": "true"},
     ]
-    return {
+
+    result = {
         'version': event['version'],
         'session': event['session'],
         'session_state': session_state,
@@ -61,6 +71,9 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
             'text': text,
             'tts': tts,
             'end_session': end_session,
-            'buttons': buttons
+            'buttons': buttons,
         },
     }
+    if name_to_photo in photo_ids:
+        result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids[name_to_photo], "description": text}
+    return result

@@ -7,7 +7,7 @@ def begin_type_proc(event, context, message):
         text = message + " " + text
     buttons = [{"title": "Сделать им замечание строгим тоном."},
                {"title": "Выгнать их из класса."}]
-    return create_response(event, {"value": "chill_start"}, text=text, buttons=buttons)
+    return create_response(event, {"value": "chill_start"}, text=text, buttons=buttons, name_to_photo="school_game")
 
 
 def begin_type(event, context, message=""):
@@ -47,7 +47,7 @@ def nach(event, context, message=""):
     buttons = [{"title": "Проведу контрольную работу, чтобы проверить, как ученики усвоили материал."},
                {"title": "Сегодня ещё раз коротко повторим всю тему, а на следующем уроке будет контрольная."},
                {"title": "Проверю у учеников домашнее задание, чтобы узнать, всё ли им было понятно."}]
-    return create_response(event, {"value": "urok"}, text=text, buttons=buttons)
+    return create_response(event, {"value": "urok"}, text=text, buttons=buttons, name_to_photo="school_game")
 
 
 def urok_req_contra(event, context, message=""):
@@ -56,7 +56,7 @@ def urok_req_contra(event, context, message=""):
     buttons = [{"title": "Сделаю вид, что ничего не было."},
                {"title": "Скажу Маше, чтобы выполняла работу самостоятельно."}]
     val = "contra"
-    return create_response(event, {"value": val}, text=text, buttons=buttons)
+    return create_response(event, {"value": val}, text=text, buttons=buttons, name_to_photo="school_game")
 
 
 def urok_req_obyasn(event, context, message=""):
@@ -65,7 +65,7 @@ def urok_req_obyasn(event, context, message=""):
     buttons = [{"title": "Продолжу объяснять несмотря на шум."},
                {"title": "Сделаю замечание, чтобы они разговаривали тихо."}]
     val = "obyasn"
-    return create_response(event, {"value": val}, text=text, buttons=buttons)
+    return create_response(event, {"value": val}, text=text, buttons=buttons, name_to_photo="school_game")
 
 
 def urok_req_dz(event, context, message=""):
@@ -74,7 +74,7 @@ def urok_req_dz(event, context, message=""):
     buttons = [{"title": "Женю"},
                {"title": "Илью"}]
     val = "dz"
-    return create_response(event, {"value": val}, text=text, buttons=buttons)
+    return create_response(event, {"value": val}, text=text, buttons=buttons, name_to_photo="school_game")
 
 
 def urok(event, context, message=""):
@@ -136,7 +136,7 @@ def dz(event, context, message=""):
 
 def konec(event, context, message=""):
     message = message + 'Наша игра закончена. Теперь ты больше знаешь о том, что чувствуют учителя, когда ведут у тебя уроки. Это очень непростая работа, поэтому старайся вести себя хорошо!'
-    return create_response(event, {"value": "show_topics"}, text=message)
+    return create_response(event, {"value": "show_topics"}, text=message, name_to_photo="school_game")
 
 
 def school_game(event, context, message=""):
@@ -148,4 +148,4 @@ def school_game(event, context, message=""):
                {"title": "Начну кричать на них, чтобы они перестали бегать."},
                {"title": "Скажу, что поставлю всем двойки, если они не успокоятся"},
                {"title": "Уйду из класса, дети сами проведут урок."}]
-    return create_response(event, {"value": "begin_type"}, text=text, buttons=buttons)
+    return create_response(event, {"value": "begin_type"}, text=text, buttons=buttons, name_to_photo="school_game")
