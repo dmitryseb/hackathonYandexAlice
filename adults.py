@@ -35,7 +35,7 @@ def answer_adults(event, context, message=""):
 
 
 def request_stress(event, context, message=""):
-    text = "Хорошо. Могу рассказать про стресс. Стресс — это состояние напряжения. Испытывать стресс — это нормально. Главное, быть рядом с ребенком и научить его справляться с этим состоянием. Хотите дам советы о том, как помочь ребенку справиться со стрессом?"
+    text = "Понял, Вы хотите поговорить про стресс. Стресс — это состояние напряжения. Испытывать стресс — это нормально. Главное, быть рядом с ребенком и научить его справляться с этим состоянием. Хотите дам советы о том, как помочь ребенку справиться со стрессом?"
     if message:
         text = message
     return create_response(event, {"value": "adults_stress"}, text=text)
@@ -91,7 +91,7 @@ def request_add_stress(event, context, message):
     if len(used_advices_str_add) != len(additional_str):
         text += '\nХотите расскажу еще про одно упражнение?'
     else:
-        text += "\n На этом с упражнениями у меня все. Хотите дам еще 1 совет, связанный со стрессом?"
+        text += "\n На этом с упражнениями у меня все. Хотите дам еще один совет, связанный со стрессом?"
     return create_response(event, {
         'value': 'adults_stress',
         'used_advices_str': used_advices_str,

@@ -7,7 +7,7 @@ end_text = "Было приятно пообщаться. Удачи тебе! �
 
 
 def request_teens(event, context, message=''):
-    text = 'Хорошо! Давай поговорим! Выбери, с чем я могу тебе помочь!'
+    text = 'Хорошо! Давай поговорим! Выбери, с чем я могу тебе помочь.'
     if message != '':
         text = message
     buttons = [
@@ -32,7 +32,7 @@ def teenagers_enter2(event, context):
         return request_teens(event, context, message='Выбери, пожалуйста, наиболее подходящую тему из списка.')
     else:
         subtopic = subtopics[senses.index(True)]
-        text = 'Можешь рассказать немного больше о проблеме?'
+        text = 'Можешь рассказать о проблеме побольше?'
         return create_response(event, {
             'value': 'teenagers_specify',
             'subtopic': subtopic,
@@ -51,13 +51,13 @@ def teenagers_specify(event, context):
     buttons = []
     if senses[0]:
         value = 'teenagers_friends'
-        text = 'Поняла, тебя интересует, как найти друзей. ' \
-               'Давай разберёмся, что такое дружба? Дружба – это регулярное общение и взаимопонимание. ' \
+        text = 'Понял, тебя интересует, как найти друзей. ' \
+               'Как ты думаешь, что такое дружба? Дружба – это регулярное общение и взаимопонимание. ' \
                'Старайся быть откровенным и честным, и ты обязательно найдёшь настоящих друзей. ' \
                'Хочешь, я дам тебе совет, как это сделать?'
     elif senses[1]:
         value = 'teenagers_love'
-        text = 'Поняла, ты хочешь поговорить об отношениях. Пожалуйста, выбери свой случай из списка.'
+        text = 'Понял, ты хочешь поговорить об отношениях. Пожалуйста, выбери свой случай из списка.'
         buttons = [
             {'title': 'Мне нравится человек, а я ему нет'},
             {'title': 'Я нравлюсь человеку, а он мне нет'},
@@ -66,7 +66,7 @@ def teenagers_specify(event, context):
         ]
     elif senses[2]:
         value = 'teenagers_bored'
-        text = 'Поняла, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
+        text = 'Понял, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
                'Хочешь идею, чем заняться?'
     return create_response(event, {
         'value': value,
@@ -80,7 +80,7 @@ def teenagers_friends(event, context):
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
         return create_response(event, {'value': 'request_teens'}, end_text)
     elif 'YANDEX.CONFIRM' not in event['request']['nlu']['intents']:
-        return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не поняла. Тебе нужен совет?')
+        return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не понял. Тебе нужен совет?')
     used_advices_fr = event['state']['session']['used_advices_fr']
     if len(used_advices_fr) == len(advices_fr):
         return create_response(event, text="Извини, советы закончились. " + end_text)
@@ -88,7 +88,9 @@ def teenagers_friends(event, context):
     while advice_id in used_advices_fr:
         advice_id = random.randint(0, len(advices_fr) - 1)
     used_advices_fr.append(advice_id)
-    text = advices_fr[advice_id] + '\nХочешь ещё один совет?'
+    text = advices_fr[advice_id]
+    if len(used_advices_fr) != len(advices_fr):
+        text += '\nХочешь ещё один совет?'
     return create_response(event, {
         'value': 'teenagers_friends',
         'used_advices_fr': used_advices_fr
@@ -131,7 +133,7 @@ def teenagers_bored(event, context):
     if 'YANDEX.REJECT' in event['request']['nlu']['intents']:
         return create_response(event, {'value': 'request_teens'}, end_text)
     elif 'YANDEX.CONFIRM' not in event['request']['nlu']['intents']:
-        return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не поняла. Тебе нужна идея?')
+        return create_response(event, {'value': 'teenagers_friends'}, 'Извини, не понял. Тебе нужна идея?')
     used_advices_br = event['state']['session']['used_advices_br']
     if len(used_advices_br) == len(advices_br):
         return {
@@ -146,7 +148,9 @@ def teenagers_bored(event, context):
     while advice_id in used_advices_br:
         advice_id = random.randint(0, len(advices_br) - 1)
     used_advices_br.append(advice_id)
-    text = advices_br[advice_id] + '\nХочешь ещё одну идею?'
+    text = advices_br[advice_id]
+    if len(used_advices_br) != len(advices_br):
+        text += '\nХочешь ещё одну идею?'
     return create_response(event, {
         'value': 'teenagers_bored',
         'used_advices_fr': used_advices_br

@@ -3,6 +3,15 @@ import pymorphy3
 morph = pymorphy3.MorphAnalyzer()
 
 
+def extract_numbers(event):
+    res = []
+    if "nlu" in event["request"] and "entities" in event["request"]["nlu"]:
+        for entity in event["request"]["nlu"]["entities"]:
+            if entity["type"] == "YANDEX.NUMBER":
+                res.append(entity["value"])
+    return res
+
+
 def have_sense(s, lists_of_key_words):
     lists_of_norm_forms = [[] for _ in range(len(lists_of_key_words))]
     for i in range(len(lists_of_key_words)):
