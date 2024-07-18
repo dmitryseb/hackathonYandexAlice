@@ -49,6 +49,12 @@ def show_what_can_you_do(event, context, message=""):
                            )
 
 
+def you_are_welcome(event, context, message=""):
+    return create_response(event, change_in_state={"value": event["state"]["session"]["prev_value"]},
+                           text="Всегда рад помочь!"
+                           )
+
+
 def show_topics(event, context, message=""):
     age = -1
     if "age" in event["state"]["session"]:

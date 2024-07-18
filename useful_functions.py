@@ -52,11 +52,13 @@ photo_ids["kids"] = "965417/b8d83841b0ed245ac3a0"
 photo_ids["teens"] = "1652229/4d3a43434cae6ed274f6"
 
 
-def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo=""):
+def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo="", low_buttons=None):
     if change_in_state is None:
         change_in_state = {}
     if buttons is None:
         buttons = []
+    if low_buttons is None:
+        low_buttons = []
     session_state = event['state']['session']
     for prop in change_in_state:
         session_state[prop] = change_in_state[prop]
@@ -68,6 +70,9 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
         tts = tts[:-2]
         tts += '.'
 
+    for i in range(len(low_buttons)):
+        low_buttons[i]["hide"] = "true"
+    buttons += low_buttons
     buttons += [
         {"title": 'Вернуться к вводу возраста', "hide": "true"},
         {"title": 'Вернуться к выбору темы', "hide": "true"},

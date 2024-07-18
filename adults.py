@@ -30,7 +30,7 @@ def answer_adults(event, context, message=""):
                                buttons=[{'title': "Как ребенку справиться со стрессом?"}
                                         ])
 
-    message = "Некорректный ответ. Пожалуйста, выберите другой вариант ответа"
+    message = "Пожалуйста, выберите из предложенных вариантов ответа."
     return request_adults(event, context, message)
 
 
@@ -88,7 +88,9 @@ def request_add_stress(event, context, message):
 
     used_advices_str_add.append(advice_id)
     text = additional_str[advice_id]
+    low_buttons = []
     if len(used_advices_str_add) != len(additional_str):
+        low_buttons = [{"title": 'Да'}]
         text += '\nХотите расскажу еще про одно упражнение?'
     else:
         text += "\n На этом с упражнениями у меня все. Хотите дам еще один совет, связанный со стрессом?"
@@ -96,4 +98,4 @@ def request_add_stress(event, context, message):
         'value': 'adults_stress',
         'used_advices_str': used_advices_str,
         'used_advices_str_add': used_advices_str_add
-    }, text, name_to_photo="adults")
+    }, text, name_to_photo="adults", low_buttons=low_buttons)

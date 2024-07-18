@@ -25,7 +25,7 @@ def begin_type(event, context, message=""):
             text = 'Дети испуганно рассаживаются на место и затихают. Урок начинается. \n'
             return nach(event, context, text)
         return begin_type_proc(event, context, message)
-    message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа. "
+    message = "Пожалуйста, выбери из предложенных вариантов ответа. "
     return school_game(event, context, message)
 
 

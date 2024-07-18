@@ -33,7 +33,7 @@ def answer_kids(event, context, message=""):
     elif res == 1:
         return school_questions(event, context)
     elif res == -1:
-        message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
+        message = "Пожалуйста, выбери из предложенных вариантов ответа."
         return request_kids(event, context, message)
     return create_response(event,
                            text="Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.",
