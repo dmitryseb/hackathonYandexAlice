@@ -1,7 +1,7 @@
 from kids import request_kids
 from teen import request_teens
 from adults import request_adults
-from useful_functions import create_response
+from useful_functions import create_response, extract_numbers
 
 
 def request_age(event, context, message=""):
@@ -17,13 +17,9 @@ def proceed_age(event, context, message=""):
         age = -1
         if "age" in event["state"]["session"]:
             age = event["state"]["session"]["age"]
-        if event["request"]["original_utterance"].isdigit():
-            age = int(event["request"]["original_utterance"])
-        elif "nlu" in event["request"] and "entities" in event["request"]["nlu"] and len(
-                event["request"]["nlu"]["entities"]) and "value" in event["request"]["nlu"][
-            "entities"][0] and event["request"]["nlu"]["entities"][0]["type"] == "YANDEX.NUMBER":
-
-            age = event["request"]["nlu"]["entities"][0]["value"]
+        numbers = extract_numbers(event)
+        if len(numbers) > 0:
+            age = numbers[0]
         event["state"]["session"]["age"] = age
         if not 0 <= age <= 99:
             text = "Пожалуйста, введите Ваш возраст (целое число от 0 до 99)."
@@ -39,7 +35,7 @@ def proceed_age(event, context, message=""):
 
 def show_manual(event, context, message=""):
     return create_response(event, change_in_state={"value": event["state"]["session"]["prev_value"]},
-                           text="Я могу помочь с психологическими вопросами, которые тебя беспокоят. "
+                           text="Я - индюк Брандуляк. Я могу помочь с психологическими вопросами, которые тебя беспокоят. "
                                 "Чтобы ввести свой возраст, скажи \"Вернуться к вводу возраста\" или нажми кнопку снизу. "
                                 "Чтобы выбрать тему для общения, скажи \"Вернуться к выбору темы\" или нажми кнопку снизу. "
                                 "Чтобы продолжить общение, напиши \"Продолжить\" или что-нибудь другое."
@@ -48,7 +44,7 @@ def show_manual(event, context, message=""):
 
 def show_what_can_you_do(event, context, message=""):
     return create_response(event, change_in_state={"value": event["state"]["session"]["prev_value"]},
-                           text="Я могу помочь с психологическими вопросами, которые тебя беспокоят. Я умею давать советы, помогать в сложных ситуациях и даже играть в игры! "
+                           text="Я - индюк Брандуляк. Я могу помочь с психологическими вопросами, которые тебя беспокоят. Я умею давать советы, помогать в сложных ситуациях и даже играть в игры! "
                                 "Чтобы продолжить общение, напиши \"Продолжить\" или что-нибудь другое."
                            )
 
