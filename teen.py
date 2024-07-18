@@ -1,7 +1,7 @@
 import random
 from advice_friendship import advices_fr
 from advice_bored import advices_br
-from useful_functions import create_response, have_sense, clear
+from useful_functions import create_response, have_sense, clear, extract_numbers
 
 end_text = "Было приятно пообщаться. Удачи тебе! Оставайся радостными человеком и приятным собеседником."
 
@@ -28,10 +28,16 @@ def teenagers_enter2(event, context):
                  ['отношения'],
                  ['эмоции', 'чувства']]
     senses = have_sense(event['request']['original_utterance'], key_words)
-    if True not in senses:
+    numbers = extract_numbers(event)
+    if True not in senses and not len(numbers):
         return request_teens(event, context, message='Выбери, пожалуйста, наиболее подходящую тему из списка.')
     else:
-        subtopic = subtopics[senses.index(True)]
+        num = -1
+        if True in senses:
+            num = senses.index(True)
+        else:
+            num = numbers[0]
+        subtopic = subtopics[num]
         text = 'Можешь рассказать о проблеме побольше?'
         return create_response(event, {
             'value': 'teenagers_specify',
@@ -108,6 +114,10 @@ def teenagers_friends(event, context):
 
 def teenagers_love(event, context, message=''):
     response = clear(event['request']['original_utterance'])
+    numbers = extract_numbers(event)
+    responses = ['Мне нравится человек, а я ему нет', 'Я нравлюсь человеку, а он мне нет', 'У меня проблемы с моим партнёром', 'Другой случай']
+    if len(numbers):
+        response = clear(responses[numbers[0] - 1])
     if response == 'другой случай':
         return create_response(event,
                                text="Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.",

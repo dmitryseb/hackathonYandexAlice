@@ -1,5 +1,5 @@
 from advices_stress import advices_str, additional_str
-from useful_functions import create_response, remain_letters
+from useful_functions import create_response, remain_letters, extract_numbers
 import random
 
 end_text = "Было приятно пообщаться"
@@ -20,9 +20,10 @@ def answer_adults(event, context, message=""):
                "Его чувства и эмоции".lower().split(),
                remain_letters("Как ребенку справиться со стрессом?").lower().split()]
 
-    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers:
-        if answers.index(event["request"]["nlu"]["tokens"]) == 2:
+    numbers = extract_numbers(event)
+    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
+        if 3 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 2:
             return request_stress(event, context)
         return create_response(event, {"value": "answer_adults"},
                                text="Извините, пока я могу вам помочь только в случаях, описанных выше. Выберите из "
@@ -69,12 +70,14 @@ def adults_stress(event, context, message=""):
 
     used_advices_str.append(advice_id)
     text = advices_str[advice_id]
+    low_buttons = []
     if advice_id != 2:
+        low_buttons = [{"title": 'Да'}]
         text += '\nХотите ещё один совет?'
     return create_response(event, {
         'value': 'adults_stress',
         'used_advices_str': used_advices_str
-    }, text, name_to_photo="adults")
+    }, text, name_to_photo="adults", low_buttons=low_buttons)
 
 
 def request_add_stress(event, context, message):

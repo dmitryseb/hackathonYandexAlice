@@ -1,5 +1,5 @@
 from relax_game import relax_game
-from useful_functions import create_response, clear
+from useful_functions import create_response, clear, extract_numbers
 from school_game import school_game
 
 
@@ -21,7 +21,10 @@ def answer_kids(event, context, message=""):
                "Друзья", "Самочувствие",
                "Давай повеселимся!"]
 
+    numbers = extract_numbers(event)
     res = -1
+    if len(numbers):
+        res = numbers[0]
     if "request" in event and "original_utterance" in event["request"]:
         for i in range(len(answers)):
             if clear(answers[i]) == clear(event["request"]["original_utterance"]):
@@ -52,10 +55,11 @@ def school_questions(event, context, message=""):
 
 def school_answers(event, context, message=""):
     answers = ["Поиграем в игру про школу".lower().split()]
+    numbers = extract_numbers(event)
 
-    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers:
-        if answers.index(event["request"]["nlu"]["tokens"]) == 0:
+    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
+        if 1 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 0:
             return school_game(event, context, message)
         return create_response(event,
                                text="выбран вариант номер " + str(answers.index(event["request"]["nlu"]["tokens"]) + 1))
