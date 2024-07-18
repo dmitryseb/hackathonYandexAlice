@@ -36,7 +36,10 @@ def answer_kids(event, context, message=""):
         message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа"
         return request_kids(event, context, message)
     return create_response(event,
-                           text="выбран вариант номер " + str(answers.index(event["request"]["nlu"]["tokens"]) + 1))
+                           text="Извини, пока я могу тебе помочь только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.",
+                           buttons=[{"title": "Школа"},
+                                    {'title': "Давай повеселимся!"},
+                                    ])
 
 
 def school_questions(event, context, message=""):
