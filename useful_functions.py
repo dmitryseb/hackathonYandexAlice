@@ -39,6 +39,8 @@ photo_ids["friends"] = "1521359/62ed0aa415f6607e6cdf"
 photo_ids["advices"] = "997614/6f1586529c708c810b60"
 photo_ids["school_game"] = "213044/eb72d04e42b2789b2ce6"
 photo_ids["boring"] = "997614/f52f1a803dffc62753b6"
+photo_ids["kids"] = "965417/b8d83841b0ed245ac3a0"
+photo_ids["teens"] = "1652229/4d3a43434cae6ed274f6"
 
 
 def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo=""):
@@ -76,4 +78,10 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
     }
     if name_to_photo in photo_ids:
         result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids[name_to_photo], "description": text}
+    elif "age" in result["session_state"]:
+        age = int(result["session_state"]["age"])
+        if 0 <= age <= 11:
+            result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids["kids"], "description": text}
+        elif 12 <= age <= 99:
+            result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids["teens"], "description": text}
     return result
