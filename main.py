@@ -32,6 +32,7 @@ functions["obyasn"] = obyasn
 functions["dz"] = dz
 functions["adults_stress"] = adults_stress
 functions["you_are_welcome"] = you_are_welcome
+functions["teenagers_friends_inter"] = teenagers_friends_inter
 
 
 def check_reference(event):
