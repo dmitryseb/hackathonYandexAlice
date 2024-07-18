@@ -1,5 +1,5 @@
 from adults import answer_adults, adults_stress
-from ages_node import request_age, proceed_age, show_manual, show_what_can_you_do, show_topics
+from ages_node import request_age, proceed_age, show_manual, show_what_can_you_do, show_topics, you_are_welcome
 from kids import school_answers, request_kids, answer_kids
 from relax_game import relax_game
 from teen import *
@@ -31,6 +31,8 @@ functions["contra"] = contra
 functions["obyasn"] = obyasn
 functions["dz"] = dz
 functions["adults_stress"] = adults_stress
+functions["you_are_welcome"] = you_are_welcome
+functions["teenagers_friends_inter"] = teenagers_friends_inter
 
 
 def check_reference(event):
@@ -40,7 +42,8 @@ def check_reference(event):
                      ['вернуть', 'вернуться', 'покажи', 'возвращаться'],
                      ['тема', 'начало'],
                      ['возраст'],
-                     ['заново']]
+                     ['заново'],
+                     ['спасибо', 'благодарить']]
         senses = have_sense(event['request']['original_utterance'], key_words)
         if senses[0]:
             event["state"]["session"]["prev_value"] = event["state"]["session"]["value"]
@@ -52,6 +55,9 @@ def check_reference(event):
             event["state"]["session"]["value"] = "show_topics"
         elif senses[2] and senses[4] or senses[5]:
             event["state"]["session"]["value"] = "request_age"
+        elif senses[6]:
+            event["state"]["session"]["prev_value"] = event["state"]["session"]["value"]
+            event["state"]["session"]["value"] = "you_are_welcome"
 
 
 def handler(event, context):  # функция для точки входа

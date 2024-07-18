@@ -3,15 +3,6 @@ import pymorphy3
 morph = pymorphy3.MorphAnalyzer()
 
 
-def extract_numbers(event):
-    res = []
-    if "nlu" in event["request"] and "entities" in event["request"]["nlu"]:
-        for entity in event["request"]["nlu"]["entities"]:
-            if entity["type"] == "YANDEX.NUMBER":
-                res.append(entity["value"])
-    return res
-
-
 def have_sense(s, lists_of_key_words):
     lists_of_norm_forms = [[] for _ in range(len(lists_of_key_words))]
     for i in range(len(lists_of_key_words)):
@@ -33,6 +24,35 @@ def clear(s):
     return s
 
 
+def extract_numbers(event):
+    res = set()
+    if "nlu" in event["request"] and "entities" in event["request"]["nlu"]:
+        for entity in event["request"]["nlu"]["entities"]:
+            if entity["type"] == "YANDEX.NUMBER":
+                res.add(int(entity["value"]))
+    words = list(map(lambda s1: clear(s1), event["request"]["original_utterance"].split()))
+    adjectives = {
+        "первый": 1,
+        "второй": 2,
+        "третий": 3,
+        "четвертый": 4,
+        "четвёртый": 4,
+        "пятый": 5,
+        "шестой": 6,
+        "седьмой": 7,
+        "восьмой": 8,
+        "девятый": 9,
+        "десятый": 10,
+    }
+    for w in words:
+        if w.isdigit():
+            res.add(int(w))
+    for adj in adjectives:
+        if have_sense(event["request"]["original_utterance"], [[adj]])[0]:
+            res.add(adjectives[adj])
+    return list(res)
+
+
 def remain_letters(s: str):
     res = ""
     for i in s:
@@ -52,22 +72,27 @@ photo_ids["kids"] = "965417/b8d83841b0ed245ac3a0"
 photo_ids["teens"] = "1652229/4d3a43434cae6ed274f6"
 
 
-def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo=""):
+def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo="", low_buttons=None):
     if change_in_state is None:
         change_in_state = {}
     if buttons is None:
         buttons = []
+    if low_buttons is None:
+        low_buttons = []
     session_state = event['state']['session']
     for prop in change_in_state:
         session_state[prop] = change_in_state[prop]
     tts = text
     if len(buttons) != 0:
         tts += " Варианты ответа: "
+        num = 1
         for button in buttons:
-            tts += button['title'] + ', '
-        tts = tts[:-2]
-        tts += '.'
+            tts += str(num) + ': ' + button['title'] + '. '
+            num += 1
 
+    for i in range(len(low_buttons)):
+        low_buttons[i]["hide"] = "true"
+    buttons += low_buttons
     buttons += [
         {"title": 'Вернуться к вводу возраста', "hide": "true"},
         {"title": 'Вернуться к выбору темы', "hide": "true"},

@@ -1,7 +1,7 @@
 import random
 from advice_friendship import advices_fr
 from advice_bored import advices_br
-from useful_functions import create_response, have_sense, clear
+from useful_functions import create_response, have_sense, clear, extract_numbers
 
 end_text = "Было приятно пообщаться. Удачи тебе! Оставайся радостными человеком и приятным собеседником."
 
@@ -28,10 +28,16 @@ def teenagers_enter2(event, context):
                  ['отношения'],
                  ['эмоции', 'чувства']]
     senses = have_sense(event['request']['original_utterance'], key_words)
-    if True not in senses:
+    numbers = extract_numbers(event)
+    if True not in senses and not len(numbers):
         return request_teens(event, context, message='Выбери, пожалуйста, наиболее подходящую тему из списка.')
     else:
-        subtopic = subtopics[senses.index(True)]
+        num = -1
+        if True in senses:
+            num = senses.index(True)
+        else:
+            num = numbers[0]
+        subtopic = subtopics[num]
         text = 'Можешь рассказать о проблеме побольше?'
         return create_response(event, {
             'value': 'teenagers_specify',
@@ -50,11 +56,9 @@ def teenagers_specify(event, context):
     value = 'teenagers_specify'
     buttons = []
     if senses[0]:
-        value = 'teenagers_friends'
+        value = 'teenagers_friends_inter'
         text = 'Понял, тебя интересует, как найти друзей. ' \
-               'Как ты думаешь, что такое дружба? Дружба – это регулярное общение и взаимопонимание. ' \
-               'Старайся быть откровенным и честным, и ты обязательно найдёшь настоящих друзей. ' \
-               'Хочешь, я дам тебе совет, как это сделать?'
+               'Как ты думаешь, что такое дружба?'
     elif senses[1]:
         value = 'teenagers_love'
         text = 'Понял, ты хочешь поговорить об отношениях. Пожалуйста, выбери свой случай из списка.'
@@ -74,6 +78,15 @@ def teenagers_specify(event, context):
     }, text, buttons)
 
 
+def teenagers_friends_inter(event, context):
+    text = 'Дружба – это регулярное общение и взаимопонимание. ' \
+               'Старайся быть откровенным и честным, и ты обязательно найдёшь настоящих друзей. ' \
+               'Хочешь, я дам тебе совет, как это сделать?'
+    return create_response(event, {
+        'value': 'teenagers_friends'
+    }, text, low_buttons=[{"title": 'Да'}])
+
+
 def teenagers_friends(event, context):
     if 'used_advices_fr' not in event['state']['session']:
         event['state']['session']['used_advices_fr'] = []
@@ -89,16 +102,22 @@ def teenagers_friends(event, context):
         advice_id = random.randint(0, len(advices_fr) - 1)
     used_advices_fr.append(advice_id)
     text = advices_fr[advice_id]
+    low_buttons = []
     if len(used_advices_fr) != len(advices_fr):
         text += '\nХочешь ещё один совет?'
+        low_buttons = [{"title": 'Да'}]
     return create_response(event, {
         'value': 'teenagers_friends',
         'used_advices_fr': used_advices_fr
-    }, text, name_to_photo="friends")
+    }, text, name_to_photo="friends", low_buttons=low_buttons)
 
 
 def teenagers_love(event, context, message=''):
     response = clear(event['request']['original_utterance'])
+    numbers = extract_numbers(event)
+    responses = ['Мне нравится человек, а я ему нет', 'Я нравлюсь человеку, а он мне нет', 'У меня проблемы с моим партнёром', 'Другой случай']
+    if len(numbers):
+        response = clear(responses[numbers[0] - 1])
     if response == 'другой случай':
         return create_response(event,
                                text="Извини, пока я могу тебе помочь, только в случаях, описанных выше. Выбери из них, возможно, мой совет будет полезен.",
@@ -149,24 +168,11 @@ def teenagers_bored(event, context):
         advice_id = random.randint(0, len(advices_br) - 1)
     used_advices_br.append(advice_id)
     text = advices_br[advice_id]
+    low_buttons = []
     if len(used_advices_br) != len(advices_br):
         text += '\nХочешь ещё одну идею?'
+        low_buttons = [{"title": 'Да'}]
     return create_response(event, {
         'value': 'teenagers_bored',
         'used_advices_fr': used_advices_br
-    }, text, name_to_photo="boring")
-
-
-def handler(event, context):
-    dict_funcs = {
-        'teenagers_specify': teenagers_specify,
-        'teenagers_friends': teenagers_friends,
-        'teenagers_love': teenagers_love,
-        'teenagers_bored': teenagers_bored,
-        'request_teens': request_teens,
-        'teenagers_enter2': teenagers_enter2
-    }
-    value = 'request_teens'
-    if 'value' in event['state']['session']:
-        value = event['state']['session']['value']
-    return dict_funcs[value](event, context)
+    }, text, name_to_photo="boring", low_buttons=low_buttons)
