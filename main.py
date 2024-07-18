@@ -1,4 +1,4 @@
-from adults import answer_adults
+from adults import answer_adults, adults_stress
 from ages_node import request_age, proceed_age, show_manual, show_what_can_you_do, show_topics
 from kids import school_answers, request_kids, answer_kids
 from relax_game import relax_game
@@ -30,6 +30,7 @@ functions["urok"] = urok
 functions["contra"] = contra
 functions["obyasn"] = obyasn
 functions["dz"] = dz
+functions["adults_stress"] = adults_stress
 
 
 def check_reference(event):
