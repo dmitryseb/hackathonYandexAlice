@@ -70,9 +70,11 @@ photo_ids["school_game"] = "213044/eb72d04e42b2789b2ce6"
 photo_ids["boring"] = "997614/f52f1a803dffc62753b6"
 photo_ids["kids"] = "965417/b8d83841b0ed245ac3a0"
 photo_ids["teens"] = "1652229/4d3a43434cae6ed274f6"
+photo_ids["default"] = "965417/16b7f3b31462fdfd5d04"
 
 
-def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo="", low_buttons=None):
+def create_response(event, change_in_state=None, text="", buttons=None, end_session='false', name_to_photo="",
+                    low_buttons=None):
     if change_in_state is None:
         change_in_state = {}
     if buttons is None:
@@ -120,4 +122,6 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
             result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids["kids"], "description": text}
         elif 12 <= age <= 99:
             result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids["teens"], "description": text}
+    else:
+        result["response"]["card"] = {'type': "BigImage", "image_id": photo_ids["default"], "description": text}
     return result
