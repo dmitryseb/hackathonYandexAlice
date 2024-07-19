@@ -78,7 +78,7 @@ def teenagers_friends_inter(event, context):
                'Хочешь, я дам тебе совет, как это сделать?'
     return create_response(event, {
         'value': 'teenagers_friends'
-    }, text, low_buttons=[{"title": 'Да'}])
+    }, text, low_buttons=[{"title": 'Да'}, {"title": 'Нет'}])
 
 
 def teenagers_friends(event, context):
@@ -99,7 +99,7 @@ def teenagers_friends(event, context):
     low_buttons = []
     if len(used_advices_fr) != len(advices_fr):
         text += '\nХочешь ещё один совет?'
-        low_buttons = [{"title": 'Да'}]
+        low_buttons = [{"title": 'Да'}, {"title": 'Нет'}]
     return create_response(event, {
         'value': 'teenagers_friends',
         'used_advices_fr': used_advices_fr
@@ -162,7 +162,7 @@ def teenagers_bored(event, context):
     low_buttons = []
     if len(used_advices_br) != len(advices_br):
         text += '\nХочешь ещё одну идею?'
-        low_buttons = [{"title": 'Да'}]
+        low_buttons = [{"title": 'Да'}, {"title": 'Нет'}]
     return create_response(event, {
         'value': 'teenagers_bored',
         'used_advices_fr': used_advices_br

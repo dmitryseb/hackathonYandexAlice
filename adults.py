@@ -70,7 +70,7 @@ def adults_stress(event, context, message=""):
     text = advices_str[advice_id]
     low_buttons = []
     if advice_id != 2:
-        low_buttons = [{"title": 'Да'}]
+        low_buttons = [{"title": 'Да'}, {"title": 'Нет'}]
         text += '\nХотите ещё один совет?'
     return create_response(event, {
         'value': 'adults_stress',
@@ -91,7 +91,7 @@ def request_add_stress(event, context, message):
     text = additional_str[advice_id]
     low_buttons = []
     if len(used_advices_str_add) != len(additional_str):
-        low_buttons = [{"title": 'Да'}]
+        low_buttons = [{"title": 'Да'}, {"title": 'Нет'}]
         text += '\nХотите расскажу еще про одно упражнение?'
     else:
         text += "\n На этом с упражнениями у меня все. Хотите дам еще один совет, связанный со стрессом?"
