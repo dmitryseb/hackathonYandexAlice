@@ -55,7 +55,7 @@ def adults_stress(event, context, message=""):
         event['state']['session']['used_advices_str_add']) != len(additional_str)):
         return request_add_stress(event, context, message)
     if len(used_advices_str) == len(advices_str):
-        return create_response(event,
+        return create_response(event, {"value": "answer_adults"},
                                text="Дети с нейроотличиями могут переживать стрессовые ситуации сложнее. Больше "
                                     "информации о помощи детям в аутистическом спектре вы сможете узнать, например, "
                                     "на сайте благотворительного фонда Антон тут рядом, а если захотите пожертвовать "
