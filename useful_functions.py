@@ -83,10 +83,12 @@ def create_response(event, change_in_state=None, text="", buttons=None, end_sess
     for prop in change_in_state:
         session_state[prop] = change_in_state[prop]
     tts = text
+    session_state['prev_buttons'] = []
     if len(buttons) != 0:
         tts += " Варианты ответа: "
         num = 1
         for button in buttons:
+            session_state['prev_buttons'].append(button['title'])
             tts += str(num) + ': ' + button['title'] + '. '
             num += 1
 
