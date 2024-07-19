@@ -45,4 +45,4 @@ def relax_game(event, context, message=""):
         else:
             text = 'Ой, я не знаю такого овоща. Попробуй, например, вспомнить что-нибудь, что добавляют в твой ' \
                    'любимый суп. Или попроси подсказку. '
-    return create_response(event, {"value": "relax_game", "used_vegs": used_vegs}, text, name_to_photo="relax_game")
+    return create_response(event, {"value": "relax_game", "used_vegs": used_vegs}, text, name_to_photo="relax_game", low_buttons=[{"title": "Дай подсказку"}])
