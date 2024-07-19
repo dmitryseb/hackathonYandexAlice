@@ -20,6 +20,7 @@ def answer_kids(event, context, message=""):
                "Школа",
                "Друзья", "Самочувствие",
                "Давай повеселимся!"]
+    res = -1
     if "request" in event and "original_utterance" in event["request"]:
         for i in range(len(answers)):
             if clear(answers[i]) == clear(event["request"]["original_utterance"]):
