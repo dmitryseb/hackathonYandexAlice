@@ -49,6 +49,7 @@ def teenagers_specify(event, context):
            'Вот примеры вопросов, с которыми я могу помочь: как найти друзей, как решить проблему в отношениях или что делать, если скучно.'
     value = 'teenagers_specify'
     buttons = []
+    low_buttons = []
     if senses[0]:
         value = 'teenagers_friends_inter'
         text = 'Понял, тебя интересует, как найти друзей. ' \
@@ -66,10 +67,11 @@ def teenagers_specify(event, context):
         value = 'teenagers_bored'
         text = 'Понял, тебе скучно. Каждый отдыхает по-своему! Можно отдыхать с друзьями или одному. Скучно бывает всем и это не беда! ' \
                'Хочешь идею, чем заняться?'
+        low_buttons = [{"title": 'Да'}, {"title": 'Нет'}]
     return create_response(event, {
         'value': value,
         'subtopic': subtopic
-    }, text, buttons)
+    }, text, buttons, low_buttons=low_buttons)
 
 
 def teenagers_friends_inter(event, context):
