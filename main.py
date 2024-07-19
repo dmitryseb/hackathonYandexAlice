@@ -3,7 +3,7 @@ from ages_node import request_age, proceed_age, show_manual, show_what_can_you_d
 from kids import school_answers, request_kids, answer_kids
 from relax_game import relax_game
 from teen import *
-from useful_functions import create_response, have_sense
+from useful_functions import create_response, have_sense, extract_numbers
 from school_game import school_game, begin_type, chill_start, urok, contra, obyasn, dz
 
 functions = dict()
@@ -72,6 +72,13 @@ def handler(event, context):  # функция для точки входа
     if 'original_utterance' not in event["request"]:
         if 'nlu' in event['request'] and 'tokens' in event["request"]["nlu"]:
             event["request"]["original_utterance"] = " ".join(event["request"]["nlu"]["tokens"])
+    if 'prev_buttons' in event['state']['session'] and len(event['state']['session']['prev_buttons']):
+        numbers = extract_numbers(event)
+        if len(numbers):
+            if 0 <= numbers[0] - 1 < len(event['state']['session']['prev_buttons']):
+                event['request']['original_utterance'] = event['state']['session']['prev_buttons'][numbers[0] - 1]
+                if 'nlu' in event['request']:
+                    event['request']['nlu']['tokens'] = list(clear(event['request']['original_utterance']).split())
 
     check_reference(event)
 

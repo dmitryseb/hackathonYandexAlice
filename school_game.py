@@ -1,4 +1,4 @@
-from useful_functions import create_response, remain_letters, extract_numbers
+from useful_functions import create_response, remain_letters
 
 
 def begin_type_proc(event, context, message):
@@ -16,13 +16,12 @@ def begin_type(event, context, message=""):
                remain_letters("Скажу, что поставлю всем двойки, если они не успокоятся.").lower().split(),
                remain_letters("Уйду из класса, дети сами проведут урок.").lower().split()]
 
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
-        if 4 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 3:
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 3:
             text = "На выходе из школы тебя встречает директор. Он очень расстроен, что ты так безответственно относишься к своей обязанности учить детей, и увольняет тебя. \n"
             return konec(event, context, text)
-        elif 1 not in numbers and answers.index(event["request"]["nlu"]["tokens"]) > 0:
+        elif answers.index(event["request"]["nlu"]["tokens"]) > 0:
             text = 'Дети испуганно рассаживаются на место и затихают. Урок начинается. \n'
             return nach(event, context, text)
         return begin_type_proc(event, context, message)
@@ -33,11 +32,10 @@ def begin_type(event, context, message=""):
 def chill_start(event, context, message=""):
     answers = [remain_letters("Сделать им замечание строгим тоном.").lower().split(),
                remain_letters("Выгнать их из класса.").lower().split()]
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
         text = 'Антон и Илья начинают плакать и обещать, что они будут себя хорошо вести. Смягчившись, ты разрешаешь им остаться, и они занимают свои места. \n'
-        if 1 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 0:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 0:
             text = 'Услышав строгий тон, Антон и Илья тоже успокаиваются и занимают свои места. \n'
         return nach(event, context, text)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа. "
@@ -86,12 +84,11 @@ def urok(event, context, message=""):
             "Сегодня ещё раз коротко повторим всю тему, а на следующем уроке будет контрольная.").lower().split(),
         remain_letters("Проверю у учеников домашнее задание, чтобы узнать, всё ли им было понятно.").lower().split()]
 
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
-        if 2 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 1:
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 1:
             return urok_req_obyasn(event, context)
-        elif 3 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 2:
+        elif answers.index(event["request"]["nlu"]["tokens"]) == 2:
             return urok_req_dz(event, context)
         return urok_req_contra(event, context)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа. "
@@ -101,11 +98,10 @@ def urok(event, context, message=""):
 def contra(event, context, message=""):
     answers = [remain_letters("Сделаю вид, что ничего не было.").lower().split(),
                remain_letters("Скажу Маше, чтобы выполняла работу самостоятельно.").lower().split()]
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
         text = 'Все заканчивают и сдают работы. После проверки выясняется, что Женя и Маша написали контрольную хорошо, а остальные плохо. Теперь Маша будет думать, что она хорошо разбирается в данной теме, хотя на самом деле хорошо понял тему только Женя. Помни, что самостоятельные работы нужны в первую очередь для учеников, чтобы они знали, что им стоит изучить ещё раз! \n'
-        if 2 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 1:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 1:
             text = 'Маша смущённо смотрит в свою работу. В конце урока все сдают работы, и после проверки выясняется, что тему хорошо усвоил только Женя. Теперь тебе легче будет спланировать следующие уроки, чтобы все ученики разобрались в теме. \n'
         return konec(event, context, text)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа. "
@@ -115,11 +111,10 @@ def contra(event, context, message=""):
 def obyasn(event, context, message=""):
     answers = [remain_letters("Продолжу объяснять несмотря на шум.").lower().split(),
                remain_letters("Сделаю замечание, чтобы они разговаривали тихо.").lower().split()]
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
         text = 'На следующем уроке все пишут контрольную, и результаты у всех плохие. Из-за шума никто не смог понять объяснений на прошлом уроке. Тишина во время занятий помогает и учителям и ученикам! \n'
-        if 2 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 1:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 1:
             text = 'На следующем уроке все пишут контрольную, и у всех хорошие результаты! Директор поздравляет тебя с тем, что все ученики так хорошо освоили трудную тему, и выдаёт премию. Отличная работа! \n'
         return konec(event, context, text)
     message = "Некорректный ответ. Пожалуйста, выбери другой вариант ответа. "
@@ -129,11 +124,10 @@ def obyasn(event, context, message=""):
 def dz(event, context, message=""):
     answers = [remain_letters("Женю.").lower().split(),
                remain_letters("Илью.").lower().split()]
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
         text = 'Женя выходит к доске и всё отвечает правильно. На следующем уроке дети пишут контрольную, и все кроме Жени пишут плохо. Помни, что всегда кто-то усваивает новые знания быстрее, кто-то медленнее, а учитель должен помогать и тем, и тем. \n'
-        if 2 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 1:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 1:
             text = 'Илья выходит к доске, и ты вместе с классом помогаешь ему разобраться в домашнем задании. На следующем уроке все пишут контрольную, и у всех отличные результаты! Директор поздравляет тебя с тем, что все ученики так хорошо освоили трудную тему и выдаёт премию. Отличная работа! \n'
         return konec(event, context, text)
     message = "Пожалуйста, выбери из предложенных вариантов ответа. "

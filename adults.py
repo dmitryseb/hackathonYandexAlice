@@ -19,11 +19,9 @@ def answer_adults(event, context, message=""):
     answers = ["Отношения с ребёнком".lower().split(),
                "Его чувства и эмоции".lower().split(),
                remain_letters("Как ребенку справиться со стрессом?").lower().split()]
-
-    numbers = extract_numbers(event)
-    if ("request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
-            event["request"]["nlu"]["tokens"] in answers) or len(numbers):
-        if 3 in numbers or answers.index(event["request"]["nlu"]["tokens"]) == 2:
+    if "request" in event and "nlu" in event["request"] and "tokens" in event["request"]["nlu"] and \
+            event["request"]["nlu"]["tokens"] in answers:
+        if answers.index(event["request"]["nlu"]["tokens"]) == 2:
             return request_stress(event, context)
         return create_response(event, {"value": "answer_adults"},
                                text="Извините, пока я могу вам помочь только в случаях, описанных выше. Выберите из "
