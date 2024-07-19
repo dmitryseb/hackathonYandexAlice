@@ -1,4 +1,4 @@
-from adults import answer_adults, adults_stress
+from adults import answer_adults, adults_stress, request_adults
 from ages_node import request_age, proceed_age, show_manual, show_what_can_you_do, show_topics, you_are_welcome
 from kids import school_answers, request_kids, answer_kids
 from relax_game import relax_game
@@ -18,6 +18,7 @@ functions['teenagers_love'] = teenagers_love
 functions['teenagers_bored'] = teenagers_bored
 functions['request_teens'] = request_teens
 functions["request_kids"] = request_kids
+functions["request_adults"] = request_adults
 functions['teenagers_enter2'] = teenagers_enter2
 functions["show_manual"] = show_manual
 functions["show_what_can_you_do"] = show_what_can_you_do
